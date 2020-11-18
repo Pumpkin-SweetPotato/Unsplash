@@ -84,10 +84,10 @@ final class DetailViewController: UIViewController {
         addViews()
         setConstraints()
         setDelegates()
+        setZoomable()
     }
 
     private func setDelegates() {
-        scrollView.delegate = self
         imageCollectionView.delegate = self
         imageCollectionView.dataSource = self
     }
