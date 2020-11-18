@@ -1,5 +1,5 @@
 //
-//  NewImageCollectionViewCellModel.swift
+//  DetailCollectionViewCellModel.swift
 //  Unsplash
 //
 //  Created by Minsoo Kim on 2020/11/17.
@@ -7,9 +7,8 @@
 
 import Foundation
 
-class NewImageCollectionViewCellModel {
+class DetailCollectionViewCellModel {
     let photo: Photo
-    let artistName: String
     let thumbnailUrlString: String
     
     init(photo: Photo) {

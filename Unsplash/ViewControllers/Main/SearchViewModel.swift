@@ -2,7 +2,7 @@
 //  SearchViewModel.swift
 //  Unsplash
 //
-//  Created by eazel7 on 2020/11/17.
+//  Created by Minsoo Kim on 2020/11/17.
 //
 
 import UIKit
@@ -12,7 +12,9 @@ protocol SearchViewInput: AnyObject {
 }
 
 protocol SearchViewOutput: AnyObject {
-    func needReload()
+    func needReloadExplorerCollectionView()
+    func needReloadNewImageCollectionView()
+    func didImageItemAdded(indexPaths: [IndexPath])
 }
 
 class SearchViewModel: SearchViewInput {
@@ -23,13 +25,14 @@ class SearchViewModel: SearchViewInput {
     var currentState: State
     
     struct State {
-        var photos: [Photo]
+        var explorerPhotos: [Photo]
+        var newImagePhotos: [Photo]
     }
     
     let apiClient: APIClient = APIClient()
     
     init(searchViewOutput: SearchViewOutput) {
-        initialState = State(photos: [])
+        initialState = State(newImagePhotos: [])
         currentState = initialState
         self.searchViewOutput = searchViewOutput
     }
@@ -39,11 +42,13 @@ class SearchViewModel: SearchViewInput {
             switch result {
             case .success(let photo):
                 print("success")
-                self?.currentState.photos = photo
-                self?.searchViewOutput?.needReload()
+                self?.currentState.newImagePhotos = photo
+                self?.searchViewOutput?.needReloadNewImageCollectionView()
             case .failure(let error):
                 print("error \(error)")
             }
         }
     }
+
+    
 }

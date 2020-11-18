@@ -2,52 +2,66 @@
 //  SearchViewController.swift
 //  Unsplash
 //
-//  Created by eazel7 on 2020/11/17.
+//  Created by Minsoo Kim on 2020/11/17.
 //
 
 import UIKit
 
 class SearchViewController: UIViewController {
-    let rootView: UIView = UIView()
-    let scrollView: UIScrollView = UIScrollView()
-    let scrollContentView: UIView = UIView()
+    // @IBOutlet weak var rootView: UIView!
+    // @IBOutlet weak var scrollView: UIScrollView!
+    // @IBOutlet weak var scrollContentView: UIView!
+    // @IBOutlet weak var topContainer: UIView!
+    // @IBOutlet weak var topImageView: UIImageView!
+    // @IBOutlet weak var appInfoButton: UIButton!
+    // @IBOutlet weak var userInfoButton: UIButton!
+    // @IBOutlet weak var keytakeawayLabel: UILabel!
+    // @IBOutlet weak var searchBar: UISearchBar!
+    // @IBOutlet weak var explorerContainer: UIView!
+    // @IBOutlet weak var explorerCollectionView: UICollectionView!
+    // @IBOutlet weak var newImagesContainer: UIView!
+    // @IBOutlet weak var newImagesCollectionView: UICollectionView!
+
+    private let rootView: UIView = UIView()
+    private let scrollView: UIScrollView = UIScrollView()
+    private let scrollContentView: UIView = UIView()
     
     //
-    let topContainer: UIView = {
+    private let topContainer: UIView = {
         let topContainer = UIView()
         topContainer.backgroundColor = .red
         
         return topContainer
     }()
     
-    let topImageView: UIImageView = {
+    private let topImageView: UIImageView = {
         let topImageView = UIImageView()
         
         return topImageView
     }()
     
-    let appInfoButton: UIButton = {
+    private let appInfoButton: UIButton = {
         let appInfoButton = UIButton()
         appInfoButton.setTitle("App", for: .normal)
         
         return appInfoButton
     }()
     
-    let userInfoButton: UIButton = {
+    private let userInfoButton: UIButton = {
         let userInfoButton = UIButton()
         userInfoButton.setTitle("User", for: .normal)
         
         return userInfoButton
     }()
     
-    let keytakeawayLabel: UILabel = {
+    private let keytakeawayLabel: UILabel = {
         let keytakeawayLabel = UILabel()
         keytakeawayLabel.text = "Photos for everyone"
         
         return keytakeawayLabel
     }()
     
-    let searchBar: UISearchBar = {
+    private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.searchBarStyle = .minimal
         searchBar.placeholder = "Search photos"
@@ -58,13 +72,14 @@ class SearchViewController: UIViewController {
     //
     
     //
-    let explorerContainer: UIView = {
+    private let explorerContainer: UIView = {
         let explorerContainer = UIView()
         explorerContainer.backgroundColor = .green
         
         return explorerContainer
     }()
-    let explorerCollectionView: UICollectionView = {
+    
+    private let explorerCollectionView: UICollectionView = {
         let flowLayout = UICollectionViewFlowLayout()
         let explorerCollectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         explorerCollectionView.register(ExplorerCollectionViewCell.self, forCellWithReuseIdentifier: ExplorerCollectionViewCell.reuseIdentifier)
@@ -72,14 +87,14 @@ class SearchViewController: UIViewController {
         return explorerCollectionView
     }()
     //
-    let newImagesContainer: UIView = {
+    private let newImagesContainer: UIView = {
         let newImagesContainer = UIView()
         newImagesContainer.backgroundColor = .gray
         
         return newImagesContainer
     }()
     
-    let newImagesCollectionView: UICollectionView = {
+    private let newImagesCollectionView: UICollectionView = {
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
         let newImagesCollectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
@@ -89,7 +104,7 @@ class SearchViewController: UIViewController {
     }()
     
     var searchViewModel: SearchViewModel!
-    let leading: CGFloat = 15
+    private let leading: CGFloat = 15
     
     lazy var explorerCellSize: CGSize = CGSize(width: explorerCollectionView.bounds.size.width - leading * 2, height: 150)
     lazy var newImageCellSize: CGSize = CGSize(width: explorerCollectionView.bounds.size.width - leading * 2, height: 300)
@@ -106,6 +121,7 @@ class SearchViewController: UIViewController {
         
         addViews()
         setConstraints()
+        setDelegates()
     }
 
     private func addViews() {
@@ -172,7 +188,7 @@ class SearchViewController: UIViewController {
 //        explorerContainer.trailingAnchor.constraint(equalTo: scrollContentView.trailingAnchor).isActive = true
 //
 //        explorerCollectionView.translatesAutoresizingMaskIntoConstraints = false
-//        explorerCollectionView.topAnchor.constraint(equalTo: explorerContainer.bottomAnchor).isActive = true
+//        explorerCollectionView.topAnchor.constraint(equalTo: explorerContainer.topAnchor).isActive = true
 //        explorerCollectionView.leadingAnchor.constraint(equalTo: explorerContainer.leadingAnchor).isActive = true
 //        explorerCollectionView.trailingAnchor.constraint(equalTo: explorerContainer.trailingAnchor).isActive = true
 //        explorerCollectionView.bottomAnchor.constraint(equalTo: explorerContainer.bottomAnchor).isActive = true
@@ -184,11 +200,19 @@ class SearchViewController: UIViewController {
 //        newImagesContainer.bottomAnchor.constraint(equalTo: scrollContentView.bottomAnchor).isActive = true
 //
 ////        newImagesCollectionView.translatesAutoresizingMaskIntoConstraints = false
-//        newImagesCollectionView.topAnchor.constraint(equalTo: newImagesContainer.bottomAnchor).isActive = true
+//        newImagesCollectionView.topAnchor.constraint(equalTo: newImagesContainer.topAnchor).isActive = true
 //        newImagesCollectionView.leadingAnchor.constraint(equalTo: newImagesContainer.leadingAnchor).isActive = true
 ////        newImagesCollectionView.heightAnchor.constraint(equalTo: view.heightAnchor).isActive = true
 //        newImagesCollectionView.trailingAnchor.constraint(equalTo: newImagesContainer.trailingAnchor).isActive = true
 //        newImagesCollectionView.bottomAnchor.constraint(equalTo: newImagesContainer.bottomAnchor).isActive = true
+    }
+
+    private func setDelegates() {
+        scrollView.delegate = self
+        explorerCollectionView.delegate = self
+        explorerCollectionView.dataSource = self
+        newImagesCollectionView.delegate = self
+        newImagesCollectionView.dataSource = self
     }
 
 }
@@ -196,7 +220,23 @@ class SearchViewController: UIViewController {
 
 
 extension SearchViewController: UICollectionViewDelegate {
-    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        switch collectionView {
+            case explorerCollectionView:
+                break
+            case newImagesCollectionView:
+                let photo = searchViewModel.currentState.newImagePhotos[indexPath.row]
+
+                let detailViewController = DetailCollectionViewCellModel(photo: photo)
+
+                detailViewController.presentationStyle
+
+                self.present(detailViewController, animated: true)
+            default:
+                break
+        }
+       
+    }
 }
 
 extension SearchViewController: UICollectionViewDelegateFlowLayout {
@@ -220,9 +260,9 @@ extension SearchViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch collectionView {
         case explorerCollectionView:
-            return 0
+            return searchViewModel.currentState.explorerPhotos.count
         case newImagesCollectionView:
-            return searchViewModel.currentState.photos.count
+            return searchViewModel.currentState.newImagePhotos.count
         default:
             return 0
         }
@@ -233,13 +273,15 @@ extension SearchViewController: UICollectionViewDataSource {
         case explorerCollectionView:
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ExplorerCollectionViewCell.reuseIdentifier, for: indexPath)
                     as? ExplorerCollectionViewCell else { fatalError() }
+
+            let photo = searchViewModel.currentState.explorerPhotos[indexPath.row]
             
             return cell
         case newImagesCollectionView:
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: NewImageCollectionViewCell.reuseIdentifier, for: indexPath)
                     as? NewImageCollectionViewCell else { fatalError() }
             
-            let photo = searchViewModel.currentState.photos[indexPath.row]
+            let photo = searchViewModel.currentState.newImagePhotos[indexPath.row]
             
             cell.newImageCollectionViewCellModel = NewImageCollectionViewCellModel(photo: photo)
             
@@ -251,9 +293,30 @@ extension SearchViewController: UICollectionViewDataSource {
 }
 
 extension SearchViewController: SearchViewOutput {
-    func needReload() {
+    func needReloadNewImageCollectionView() {
         DispatchQueue.main.async {
             self.newImagesCollectionView.reloadData()
         }
+    }
+
+    func needReloadExplorerCollectionView() {
+        DispatchQueue.main.async {
+            self.explorerCollectionView.reloadData()
+        }
+    }
+
+    func didImageItemAdded(indexPaths: [IndexPath]) {
+        DispatchQueue.main.async {
+            self.newImagesCollectionView.insertItems(at: indexPaths)
+        }
+    }
+}
+
+
+extension SearchViewController {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let contentY = scrollView.contentOffset.y
+        // let height = initialImageHeight - contentY
+        // imageViewHeightConstraint.constant = height
     }
 }
