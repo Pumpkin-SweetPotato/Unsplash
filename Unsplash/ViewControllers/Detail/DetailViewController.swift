@@ -10,23 +10,43 @@ import UIKit
 final class DetailViewController: UIViewController {
     let closeButton: UIButton = {
         let closeButton = UIButton()
+        closeButton.tintColor = .white
+        if #available(iOS 13.0, *) {
+            closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
+        } else {
+            // Fallback on earlier versions
+        }
 
         return closeButton
     }()
 
     let artistNameLabel: UILabel = {
         let artistNameLabel = UILabel()
-
+        artistNameLabel.font = .systemFont(ofSize: 14)
+        artistNameLabel.textColor = .white
+        
         return artistNameLabel
     }()
 
     let shareButton: UIButton = {
         let shareButton = UIButton()
+        shareButton.tintColor = .white
+        if #available(iOS 13.0, *) {
+            shareButton.setImage(UIImage(systemName: "square.and.arrow.up"), for: .normal)
+        } else {
+            // Fallback on earlier versions
+        }
         return shareButton
     }()
 
     let infoButton: UIButton = {
         let infoButton = UIButton()
+        if #available(iOS 13.0, *) {
+            infoButton.setImage(UIImage(systemName: "info.cirle"), for: .normal)
+        } else {
+            // Fallback on earlier versions
+        }
+        
         return infoButton
     }()
 
@@ -57,39 +77,58 @@ final class DetailViewController: UIViewController {
 
     let imageCollectionView: UICollectionView = {
         let flowLayout = UICollectionViewFlowLayout()
-        flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+        flowLayout.scrollDirection = .horizontal
+        
         let imageCollectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
-        imageCollectionView.register(DetailCollecionViewCell.self, forCellWithReuseIdentifier: DetailCollecionViewCell.reuseIdentifier)
+        imageCollectionView.register(DetailCollectionViewCell.self, forCellWithReuseIdentifier: DetailCollectionViewCell.reuseIdentifier)
+        imageCollectionView.showsHorizontalScrollIndicator = false
+//        imageCollectionView.decelerationRate = .fast
         
         return imageCollectionView
     }()
     
     var detailViewModel: DetailViewModel!
+    var initialIndexLayouted: Bool = false
 
     init(detailViewModel: DetailViewModel) {
-        super.init()
+        super.init(nibName: nil, bundle: nil)
 
         defer {
             self.detailViewModel = detailViewModel
         }
     }
-
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         defer {
-            detailViewModel.viewDidLoad()
+            detailViewModel.detailViewOutput = self
         }
         
         addViews()
         setConstraints()
         setDelegates()
-        setZoomable()
+        setCloseButtonAction()
     }
 
     private func setDelegates() {
         imageCollectionView.delegate = self
         imageCollectionView.dataSource = self
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        if !initialIndexLayouted {
+            initialIndexLayouted = true
+            imageCollectionView.setNeedsLayout()
+            imageCollectionView.layoutIfNeeded()
+            imageCollectionView.scrollToItem(at: detailViewModel.currentState.currentIndex, at: .centeredHorizontally, animated: false)
+        }
     }
 
     private func addViews() {
@@ -108,7 +147,7 @@ final class DetailViewController: UIViewController {
     private func setConstraints() {
         imageCollectionView.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.active([
+        NSLayoutConstraint.activate([
             imageCollectionView.topAnchor.constraint(equalTo: view.topAnchor),
             imageCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             imageCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -117,53 +156,100 @@ final class DetailViewController: UIViewController {
 
         closeButton.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.active([
-            closeButton.topAnchor.constraint(equalTo: view.topAnchor),
-            closeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor)
+        NSLayoutConstraint.activate([
+            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            closeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            closeButton.widthAnchor.constraint(equalToConstant: 25),
+            closeButton.heightAnchor.constraint(equalToConstant: 25)
         ])
 
         artistNameLabel.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.active([
-            artistNameLabel.topAnchor.constraint(equalTo: view.topAnchor),
-            artistNameLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+        NSLayoutConstraint.activate([
+            artistNameLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            artistNameLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            artistNameLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 20),
+            artistNameLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 20),
         ])
 
         shareButton.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.active([
-            shareButton.topAnchor.constraint(equalTo: view.topAnchor),
+        NSLayoutConstraint.activate([
+            shareButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             shareButton.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
 
         infoButton.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.active([
+        NSLayoutConstraint.activate([
             infoButton.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             infoButton.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
         verticalButtonStackView.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.active([
+        NSLayoutConstraint.activate([
             verticalButtonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             verticalButtonStackView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
-}
-
-
-
-extension SearchViewController: UICollectionViewDelegate {
-}
-
-extension SearchViewController: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        collectionView.bounds.size
+    
+    func setCloseButtonAction() {
+        closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
+    }
+    
+    @objc
+    func closeButtonTapped() {
+        self.dismiss(animated: true, completion: nil)
     }
 }
 
-extension SearchViewController: UICollectionViewDataSource {
+
+
+extension DetailViewController: UICollectionViewDelegate {
+}
+
+extension DetailViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        collectionView.bounds.size
+    }
+    
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        let imageCount = detailViewModel.currentState.photos.count
+        
+        targetContentOffset.pointee = scrollView.contentOffset
+        
+        let targetIndex: CGFloat = scrollView.contentOffset.x / imageCollectionView.bounds.width
+        
+        var factor: CGFloat = 0.5
+        
+        if velocity.x < 0 {
+            factor = -factor
+        }
+        
+        var index = Int(round(targetIndex + factor))
+        
+        if index < 0 {
+            index = 0
+        } else {
+            index = min(imageCount - 1, index)
+        }
+        let targetIndexPath = IndexPath(row: index, section: 0)
+//        DispatchQueue.main.async {
+//            self.artistNameLabel.text = self.detailViewModel.currentState.photos[index].user.username
+//        UIView.animate(withDuration: 0.5) {
+            self.imageCollectionView.scrollToItem(at: targetIndexPath, at: .left, animated: true)
+//        } completion: { _ in
+            self.detailViewModel.currentIndexChanged(indexPath: targetIndexPath)
+//            }
+
+        
+        
+//        }
+    }
+}
+
+extension DetailViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         1
     }
@@ -173,42 +259,21 @@ extension SearchViewController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: DetailCollecionViewCell.reuseIdentifier, for: indexPath)
-                    as? DetailCollecionViewCell else { fatalError() }
+        guard let cell =
+             collectionView.dequeueReusableCell(withReuseIdentifier: DetailCollectionViewCell.reuseIdentifier, for: indexPath)
+                    as? DetailCollectionViewCell else { fatalError() }
             
-        let photo = detailViewModel.currentState.newImagePhotos[indexPath.row]
+        let photo = detailViewModel.currentState.photos[indexPath.row]
         
-        cell.detailCollectionViewCellModel = DetailCollecionViewCellModel(photo: photo)
+        cell.detailCollectionViewCellModel = DetailCollectionViewCellModel(photo: photo)
         
         return cell
     }
 }
 
-extension SearchViewController: SearchViewOutput {
-    func needReloadNewImageCollectionView() {
-        DispatchQueue.main.async {
-            self.imageCollectionView.reloadData()
-        }
-    }
-
-    func needReloadExplorerCollectionView() {
-        DispatchQueue.main.async {
-            self.explorerCollectionView.reloadData()
-        }
-    }
-
-    func didImageItemAdded(indexPaths: [IndexPath]) {
-        DispatchQueue.main.async {
-            self.imageCollectionView.insertItems(at: indexPaths)
-        }
+extension DetailViewController: DetailViewOutput {
+    func setArtistName(_ artistName: String) {
+        self.artistNameLabel.text = artistName
     }
 }
 
-
-extension SearchViewController {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let contentY = scrollView.contentOffset.y
-        // let height = initialImageHeight - contentY
-        // imageViewHeightConstraint.constant = height
-    }
-}

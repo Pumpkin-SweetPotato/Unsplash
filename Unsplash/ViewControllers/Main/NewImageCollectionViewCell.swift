@@ -10,18 +10,17 @@ import UIKit
 class NewImageCollectionViewCell: UICollectionViewCell {
     static let reuseIdentifier: String = String(describing: NewImageCollectionViewCell.self)
 
-    private let stackView: UIStackView
-    
     private let artistNameLabel: UILabel = {
         let artistNameLabel = UILabel()
-        artistNameLabel.font = .systemFont(ofSize: 12, weight: .medium)
+        artistNameLabel.font = .systemFont(ofSize: 14, weight: .medium)
+        artistNameLabel.textColor = .white
         
         return artistNameLabel
     }()
     
     private let imageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
+        imageView.contentMode = .scaleAspectFill
         
         return imageView
     }()
@@ -34,7 +33,9 @@ class NewImageCollectionViewCell: UICollectionViewCell {
             let imageUrl = newImageCollectionViewCellModel.thumbnailUrlString
             
             ImageDownloadManager.shared.downloadImage(imageUrl, indexPath: nil) { [weak self] (image, url, indexPath, error) in
-                self?.imageView.image = image
+                DispatchQueue.main.async {
+                    self?.imageView.image = image
+                }
             }
         }
     }
@@ -54,7 +55,7 @@ class NewImageCollectionViewCell: UICollectionViewCell {
 
         contentView.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.active([
+        NSLayoutConstraint.activate([
             contentView.topAnchor.constraint(equalTo: topAnchor),
             contentView.leadingAnchor.constraint(equalTo: leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: trailingAnchor),
@@ -63,20 +64,21 @@ class NewImageCollectionViewCell: UICollectionViewCell {
 
         imageView.translatesAutoresizingMaskIntoConstraints = false
         
-        // NSLayoutConstraint.active([
-        //     imageView.topAnchor.constraint(equalTo: contentView.topAnchor),
-        //     imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-        //     imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-        //     imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
-        // ])
+        NSLayoutConstraint.activate([
+            imageView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            imageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+//            imageView.heightAnchor.constraint(equalTo: contentView.heightAnchor),
+            imageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            imageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+        ])
+        
         artistNameLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        NSLayoutConstraint.active([
-            artistNameLabel.bottomAnchor.constraint(equalTo: imageView.bottomAnchor, constant: -10),
+        NSLayoutConstraint.activate([
+            artistNameLabel.bottomAnchor.constraint(equalTo: imageView.bottomAnchor, constant: -15),
             artistNameLabel.leadingAnchor.constraint(equalTo: imageView.leadingAnchor, constant: 15)
-        ]
+        ])
     }
-    
     
 }
 

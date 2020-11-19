@@ -5,7 +5,7 @@
 //  Created by Minsoo Kim on 2020/11/17.
 //
 
-import Foundation
+import UIKit
 
 class NewImageCollectionViewCellModel {
     let photo: Photo
@@ -16,6 +16,6 @@ class NewImageCollectionViewCellModel {
         self.photo = photo
         
         self.artistName = photo.user.username
-        self.thumbnailUrlString = photo.urls.thumb
+        self.thumbnailUrlString = photo.urls.regular
     }
 }

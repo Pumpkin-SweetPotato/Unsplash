@@ -44,6 +44,18 @@ class APIClient {
                 jsonDecoder.dateDecodingStrategy = .iso8601
                 let jsonObject = try jsonDecoder.decode(T.self, from: data)
                 
+                switch apiRouter {
+                case .getPhoto:
+                    if let links = httpResponse.allHeaderFields["Link"] as? String {
+                        if !links.contains("next"), var response = jsonObject as? PaginationResponse {
+                            response.isLastPage = true
+                            completionHandler(.success(response as! T))
+                        }
+                    }
+                default:
+                    break;
+                }
+                
                 completionHandler(.success(jsonObject))
             } catch let error as DecodingError {
                 switch error {

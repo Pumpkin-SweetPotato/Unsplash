@@ -57,6 +57,9 @@ class SearchViewController: UIViewController {
     private let keytakeawayLabel: UILabel = {
         let keytakeawayLabel = UILabel()
         keytakeawayLabel.text = "Photos for everyone"
+        keytakeawayLabel.textColor = .white
+        keytakeawayLabel.font = .systemFont(ofSize: 26, weight: .bold)
+        keytakeawayLabel.textAlignment = .center
         
         return keytakeawayLabel
     }()
@@ -65,11 +68,20 @@ class SearchViewController: UIViewController {
         let searchBar = UISearchBar()
         searchBar.searchBarStyle = .minimal
         searchBar.placeholder = "Search photos"
-        searchBar.setImage(UIImage(systemName: "magnifyingglass"), for: .search, state: .normal)
+//        searchBar.searchTextField.textColor = .white
+//        searchBar.setImage(UIImage(systemName: "magnifyingglass"), for: .search, state: .normal)
         
         return searchBar
     }()
-    //
+    
+    private let artistNameLabel: UILabel = {
+        let artistNameLabel = UILabel()
+        artistNameLabel.font = .systemFont(ofSize: 9, weight: .light)
+        artistNameLabel.textColor = .white
+        artistNameLabel.text = "Photo by Aaron Burden"
+        
+        return artistNameLabel
+    }()
     
     //
     private let explorerContainer: UIView = {
@@ -79,6 +91,15 @@ class SearchViewController: UIViewController {
         return explorerContainer
     }()
     
+    private let explorerLabel: UILabel = {
+        let explorerLabel = UILabel()
+        explorerLabel.text = "Explore"
+        explorerLabel.textColor = .black
+        explorerLabel.font = .systemFont(ofSize: 15)
+        
+        return explorerLabel
+    }()
+    
     private let explorerCollectionView: UICollectionView = {
         let flowLayout = UICollectionViewFlowLayout()
         let explorerCollectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
@@ -86,7 +107,7 @@ class SearchViewController: UIViewController {
         
         return explorerCollectionView
     }()
-    //
+    
     private let newImagesContainer: UIView = {
         let newImagesContainer = UIView()
         newImagesContainer.backgroundColor = .gray
@@ -94,17 +115,26 @@ class SearchViewController: UIViewController {
         return newImagesContainer
     }()
     
+    private let newImageLabel: UILabel = {
+        let newImageLabel = UILabel()
+        newImageLabel.text = "New"
+        newImageLabel.font = .systemFont(ofSize: 15)
+        
+        return newImageLabel
+    }()
+    
     private let newImagesCollectionView: UICollectionView = {
-        let flowLayout = UICollectionViewFlowLayout()
-        flowLayout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+        let flowLayout = FlexibleHeightCollectionViewLayout()
         let newImagesCollectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         newImagesCollectionView.register(NewImageCollectionViewCell.self, forCellWithReuseIdentifier: NewImageCollectionViewCell.reuseIdentifier)
+        newImagesCollectionView.backgroundColor = .white
         
         return newImagesCollectionView
     }()
     
     var searchViewModel: SearchViewModel!
     private let leading: CGFloat = 15
+    private let trailing: CGFloat = 15
     
     lazy var explorerCellSize: CGSize = CGSize(width: explorerCollectionView.bounds.size.width - leading * 2, height: 150)
     lazy var newImageCellSize: CGSize = CGSize(width: explorerCollectionView.bounds.size.width - leading * 2, height: 300)
@@ -113,7 +143,8 @@ class SearchViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         defer {
-            searchViewModel = SearchViewModel(searchViewOutput: self)
+            searchViewModel = SearchViewModel()
+            searchViewModel.searchViewOutput = self
             searchViewModel.viewDidLoad()
         }
         
@@ -123,6 +154,16 @@ class SearchViewController: UIViewController {
         setConstraints()
         setDelegates()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        
+    }
+    
+    override func updateViewConstraints() {
+        super.updateViewConstraints()
+    }
 
     private func addViews() {
         view.addSubview(rootView)
@@ -130,81 +171,177 @@ class SearchViewController: UIViewController {
         scrollView.addSubview(scrollContentView)
         
         scrollContentView.addSubview(topContainer)
-        
+
         topContainer.addSubview(topImageView)
         topContainer.addSubview(appInfoButton)
         topContainer.addSubview(userInfoButton)
         topContainer.addSubview(keytakeawayLabel)
         topContainer.addSubview(searchBar)
-        
+
         scrollContentView.addSubview(explorerContainer)
+        explorerContainer.addSubview(explorerLabel)
         explorerContainer.addSubview(explorerCollectionView)
         
         scrollContentView.addSubview(newImagesContainer)
+        newImagesContainer.addSubview(newImageLabel)
         newImagesContainer.addSubview(newImagesCollectionView)
     }
     
     private func setConstraints() {
         rootView.translatesAutoresizingMaskIntoConstraints = false
-        rootView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-        rootView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        rootView.heightAnchor.constraint(equalTo: view.heightAnchor).isActive = true
-        rootView.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
-        rootView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        rootView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         
-//        scrollView.translatesAutoresizingMaskIntoConstraints = false
-//        scrollView.topAnchor.constraint(equalTo: rootView.topAnchor).isActive = true
-//        scrollView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor).isActive = true
-//        scrollView.heightAnchor.constraint(equalTo: rootView.heightAnchor).isActive = true
-//        scrollView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor).isActive = true
-//        scrollView.bottomAnchor.constraint(equalTo: rootView.bottomAnchor).isActive = true
-//        scrollView.backgroundColor = .blue
+        NSLayoutConstraint.activate([
+            rootView.topAnchor.constraint(equalTo: view.topAnchor),
+            rootView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            rootView.heightAnchor.constraint(equalTo: view.heightAnchor),
+            rootView.widthAnchor.constraint(equalTo: view.widthAnchor),
+            rootView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            rootView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+        
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        
+        scrollView.contentInsetAdjustmentBehavior = .never
+        
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: rootView.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor),
+            scrollView.heightAnchor.constraint(equalTo: rootView.heightAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: rootView.bottomAnchor)
+        ])
+        
+        scrollContentView.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            scrollContentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            scrollContentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            scrollContentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            scrollContentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            scrollContentView.heightAnchor.constraint(greaterThanOrEqualTo: scrollView.heightAnchor),
+            scrollContentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)
+        ])
+        
+        scrollContentView.backgroundColor = .brown
+        
+        topContainer.translatesAutoresizingMaskIntoConstraints = false
+        topContainer.backgroundColor = .cyan
+//
+        NSLayoutConstraint.activate([
+            topContainer.topAnchor.constraint(equalTo: scrollContentView.topAnchor),
+            topContainer.leadingAnchor.constraint(equalTo: scrollContentView.leadingAnchor),
+            topContainer.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.43),
+            topContainer.trailingAnchor.constraint(equalTo: scrollContentView.trailingAnchor),
+            topContainer.widthAnchor.constraint(equalTo: scrollContentView.widthAnchor)
+        ])
 
-//        scrollContentView.translatesAutoresizingMaskIntoConstraints = false
-//        scrollContentView.topAnchor.constraint(equalTo: scrollView.topAnchor).isActive = true
-//        scrollContentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor).isActive = true
-//        scrollContentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor).isActive = true
-//        scrollContentView.heightAnchor.constraint(equalTo: scrollView.heightAnchor).isActive = true
-//        scrollContentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
-//        scrollContentView.backgroundColor = .brown
+        topImageView.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            topImageView.topAnchor.constraint(equalTo: topContainer.topAnchor),
+            topImageView.heightAnchor.constraint(equalTo: topContainer.heightAnchor),
+            topImageView.widthAnchor.constraint(equalTo: topContainer.widthAnchor),
+            topImageView.leadingAnchor.constraint(equalTo: topContainer.leadingAnchor),
+            topImageView.trailingAnchor.constraint(equalTo: topContainer.trailingAnchor),
+//            topImageView.bottomAnchor.constraint(equalTo: topContainer.bottomAnchor),
+        ])
         
-//        topContainer.translatesAutoresizingMaskIntoConstraints = false
-//        topContainer.topAnchor.constraint(equalTo: scrollContentView.topAnchor).isActive = true
-//        topContainer.leadingAnchor.constraint(equalTo: scrollContentView.leadingAnchor).isActive = true
-//        topContainer.trailingAnchor.constraint(equalTo: scrollContentView.trailingAnchor).isActive = true
-//
-//
-//        topImageView.translatesAutoresizingMaskIntoConstraints = false
-//        topImageView.topAnchor.constraint(equalTo: topContainer.topAnchor).isActive = true
-//        topImageView.heightAnchor.constraint(equalToConstant: 200).isActive = true
-//        topImageView.leadingAnchor.constraint(equalTo: topContainer.leadingAnchor).isActive = true
-//        topImageView.trailingAnchor.constraint(equalTo: topContainer.trailingAnchor).isActive = true
-//        topImageView.bottomAnchor.constraint(equalTo: topContainer.bottomAnchor).isActive = true
-//
-//        explorerContainer.translatesAutoresizingMaskIntoConstraints = false
-//        explorerContainer.topAnchor.constraint(equalTo: topContainer.bottomAnchor).isActive = true
-//        explorerContainer.leadingAnchor.constraint(equalTo: scrollContentView.leadingAnchor).isActive = true
-//        explorerContainer.trailingAnchor.constraint(equalTo: scrollContentView.trailingAnchor).isActive = true
-//
-//        explorerCollectionView.translatesAutoresizingMaskIntoConstraints = false
-//        explorerCollectionView.topAnchor.constraint(equalTo: explorerContainer.topAnchor).isActive = true
-//        explorerCollectionView.leadingAnchor.constraint(equalTo: explorerContainer.leadingAnchor).isActive = true
-//        explorerCollectionView.trailingAnchor.constraint(equalTo: explorerContainer.trailingAnchor).isActive = true
-//        explorerCollectionView.bottomAnchor.constraint(equalTo: explorerContainer.bottomAnchor).isActive = true
-//
-//        newImagesContainer.translatesAutoresizingMaskIntoConstraints = false
-//        newImagesContainer.topAnchor.constraint(equalTo: explorerContainer.bottomAnchor).isActive = true
-//        newImagesContainer.leadingAnchor.constraint(equalTo: scrollContentView.leadingAnchor).isActive = true
-//        newImagesContainer.trailingAnchor.constraint(equalTo: scrollContentView.trailingAnchor).isActive = true
-//        newImagesContainer.bottomAnchor.constraint(equalTo: scrollContentView.bottomAnchor).isActive = true
-//
-////        newImagesCollectionView.translatesAutoresizingMaskIntoConstraints = false
-//        newImagesCollectionView.topAnchor.constraint(equalTo: newImagesContainer.topAnchor).isActive = true
-//        newImagesCollectionView.leadingAnchor.constraint(equalTo: newImagesContainer.leadingAnchor).isActive = true
-////        newImagesCollectionView.heightAnchor.constraint(equalTo: view.heightAnchor).isActive = true
-//        newImagesCollectionView.trailingAnchor.constraint(equalTo: newImagesContainer.trailingAnchor).isActive = true
-//        newImagesCollectionView.bottomAnchor.constraint(equalTo: newImagesContainer.bottomAnchor).isActive = true
+        appInfoButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            appInfoButton.leadingAnchor.constraint(equalTo: topContainer.leadingAnchor, constant: leading),
+            appInfoButton.topAnchor.constraint(equalTo: topContainer.topAnchor, constant: 30),
+            appInfoButton.widthAnchor.constraint(equalToConstant: 35),
+            appInfoButton.heightAnchor.constraint(equalToConstant: 35),
+        ])
+        
+        userInfoButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            userInfoButton.trailingAnchor.constraint(equalTo: topContainer.trailingAnchor, constant: -trailing),
+            userInfoButton.topAnchor.constraint(equalTo: topContainer.topAnchor, constant: 30),
+            userInfoButton.widthAnchor.constraint(equalToConstant: 35),
+            userInfoButton.heightAnchor.constraint(equalToConstant: 35),
+        ])
+        
+        keytakeawayLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            keytakeawayLabel.centerXAnchor.constraint(equalTo: topContainer.centerXAnchor),
+            keytakeawayLabel.widthAnchor.constraint(equalTo: topContainer.widthAnchor),
+            keytakeawayLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 35),
+            keytakeawayLabel.bottomAnchor.constraint(equalTo: searchBar.topAnchor, constant: -10)
+        ])
+        
+        searchBar.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            searchBar.bottomAnchor.constraint(greaterThanOrEqualTo: topContainer.bottomAnchor, constant: -70),
+            searchBar.centerXAnchor.constraint(equalTo: topContainer.centerXAnchor),
+            searchBar.widthAnchor.constraint(equalTo: topContainer.widthAnchor, constant:  -(leading + trailing)),
+            
+        ])
+        
+    
+
+        explorerContainer.translatesAutoresizingMaskIntoConstraints = false
+        explorerContainer.backgroundColor = .blue
+        
+        NSLayoutConstraint.activate([
+            explorerContainer.topAnchor.constraint(equalTo: topContainer.bottomAnchor),
+            explorerContainer.widthAnchor.constraint(equalTo: topContainer.widthAnchor),
+            explorerContainer.heightAnchor.constraint(greaterThanOrEqualToConstant: 0),
+            explorerContainer.leadingAnchor.constraint(equalTo: scrollContentView.leadingAnchor),
+            explorerContainer.trailingAnchor.constraint(equalTo: scrollContentView.trailingAnchor),
+        ])
+        
+        explorerLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            explorerLabel.leadingAnchor.constraint(equalTo: explorerContainer.leadingAnchor, constant: leading),
+            explorerLabel.topAnchor.constraint(equalTo: explorerContainer.topAnchor, constant: 15),
+            explorerLabel.widthAnchor.constraint(lessThanOrEqualTo: explorerContainer.widthAnchor),
+            explorerLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 20)
+        ])
+
+        explorerCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            explorerCollectionView.topAnchor.constraint(equalTo: explorerLabel.bottomAnchor),
+            explorerCollectionView.heightAnchor.constraint(equalToConstant: 180),
+            explorerCollectionView.widthAnchor.constraint(equalTo: explorerContainer.widthAnchor),
+            explorerCollectionView.leadingAnchor.constraint(equalTo: explorerContainer.leadingAnchor),
+            explorerCollectionView.trailingAnchor.constraint(equalTo: explorerContainer.trailingAnchor),
+            explorerCollectionView.bottomAnchor.constraint(equalTo: explorerContainer.bottomAnchor),
+        ])
+
+        newImagesContainer.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            newImagesContainer.topAnchor.constraint(equalTo: explorerContainer.bottomAnchor),
+            newImagesContainer.leadingAnchor.constraint(equalTo: scrollContentView.leadingAnchor),
+            newImagesContainer.trailingAnchor.constraint(equalTo: scrollContentView.trailingAnchor),
+            newImagesContainer.bottomAnchor.constraint(equalTo: scrollContentView.bottomAnchor),
+        ])
+        
+        newImageLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            newImageLabel.leadingAnchor.constraint(equalTo: explorerContainer.leadingAnchor, constant: leading),
+            newImageLabel.topAnchor.constraint(equalTo: newImagesContainer.topAnchor, constant: 15),
+            newImageLabel.widthAnchor.constraint(lessThanOrEqualTo: explorerContainer.widthAnchor),
+            newImageLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 20)
+        ])
+
+        newImagesCollectionView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            newImagesCollectionView.topAnchor.constraint(equalTo: newImageLabel.bottomAnchor),
+            newImagesCollectionView.leadingAnchor.constraint(equalTo: newImagesContainer.leadingAnchor),
+            newImagesCollectionView.heightAnchor.constraint(equalTo: view.heightAnchor),
+            newImagesCollectionView.trailingAnchor.constraint(equalTo: newImagesContainer.trailingAnchor),
+            newImagesCollectionView.bottomAnchor.constraint(equalTo: newImagesContainer.bottomAnchor),
+        ])
+        
+        view.updateConstraintsIfNeeded()
     }
 
     private func setDelegates() {
@@ -213,6 +350,10 @@ class SearchViewController: UIViewController {
         explorerCollectionView.dataSource = self
         newImagesCollectionView.delegate = self
         newImagesCollectionView.dataSource = self
+        
+        if let layout = newImagesCollectionView.collectionViewLayout as?  FlexibleHeightCollectionViewLayout {
+            layout.delegate = self
+        }
     }
 
 }
@@ -225,11 +366,11 @@ extension SearchViewController: UICollectionViewDelegate {
             case explorerCollectionView:
                 break
             case newImagesCollectionView:
-                let photo = searchViewModel.currentState.newImagePhotos[indexPath.row]
+                let detailViewModel = DetailViewModel(photos: searchViewModel.currentState.newImagePhotos, selectedIndex: indexPath)
 
-                let detailViewController = DetailCollectionViewCellModel(photo: photo)
-
-                detailViewController.presentationStyle
+                let detailViewController = DetailViewController(detailViewModel: detailViewModel)
+                
+                detailViewController.modalPresentationStyle = .overFullScreen
 
                 self.present(detailViewController, animated: true)
             default:
@@ -249,6 +390,14 @@ extension SearchViewController: UICollectionViewDelegateFlowLayout {
         default:
             return .zero
         }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        .zero
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        .zero
     }
 }
 
@@ -312,11 +461,30 @@ extension SearchViewController: SearchViewOutput {
     }
 }
 
+extension SearchViewController: FlexibleHeightCollectionViewLayoutDelegate {
+    func collectionView(_ collectionView: UICollectionView, heightForPhotoAtIndexPath indexPath: IndexPath) -> CGFloat {
+        
+        let photo = searchViewModel.currentState.newImagePhotos[indexPath.row]
+        let imageWidthRatio: CGFloat = collectionView.bounds.width / CGFloat(photo.width)
+        let imageHeight: CGFloat = CGFloat(photo.height) * imageWidthRatio
+        
+        return imageHeight
+    }
+}
 
 extension SearchViewController {
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        guard velocity.y > 0 else { return }
+        
+        let height = scrollView.contentSize.height
+        
+        if height * 0.7 < velocity.y + targetContentOffset.pointee.y {
+            searchViewModel.aboutToReachingBottom()
+        }
+    }
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let contentY = scrollView.contentOffset.y
-        // let height = initialImageHeight - contentY
-        // imageViewHeightConstraint.constant = height
+
     }
 }
