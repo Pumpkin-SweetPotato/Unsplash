@@ -21,7 +21,8 @@ class APIClient {
         return session.dataTask(with: url, completionHandler: completionHandler)
     }
    
-    func reqeust<T: Codable>(_ type: T.Type, apiRouter: APIRouter, completionHandler: @escaping (Result<T, Error>) -> Void) {
+    @discardableResult
+    func reqeust<T: Codable>(_ type: T.Type, apiRouter: APIRouter, completionHandler: @escaping (Result<T, Error>) -> Void) -> URLSessionTask? {
         let request = makeRequest(apiRouter: apiRouter) { (data, response, requestError) in
             if let requestError = requestError {
                 completionHandler(.failure(requestError))
@@ -84,6 +85,8 @@ class APIClient {
         }
        
         request?.resume()
+        
+        return request
     }
 }
 

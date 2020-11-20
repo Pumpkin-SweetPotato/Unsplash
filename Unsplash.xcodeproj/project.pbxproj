@@ -35,6 +35,8 @@
 		CF264FCC2566AD9F0095475B /* DetailCollectionViewCellModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF264FCB2566AD9F0095475B /* DetailCollectionViewCellModel.swift */; };
 		CF264FD22566D0110095475B /* FlexibleHeightCollectionViewLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF264FD12566D0110095475B /* FlexibleHeightCollectionViewLayout.swift */; };
 		CF264FD62566F30B0095475B /* PhotoResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF264FD52566F30B0095475B /* PhotoResponse.swift */; };
+		CF264FDF2567B8000095475B /* SearchViewController+UICollectionViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF264FDE2567B8000095475B /* SearchViewController+UICollectionViewDelegate.swift */; };
+		CF264FE22567B8E90095475B /* ViewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF264FE12567B8E90095475B /* ViewConstants.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,6 +70,8 @@
 		CF264FCB2566AD9F0095475B /* DetailCollectionViewCellModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailCollectionViewCellModel.swift; sourceTree = "<group>"; };
 		CF264FD12566D0110095475B /* FlexibleHeightCollectionViewLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlexibleHeightCollectionViewLayout.swift; sourceTree = "<group>"; };
 		CF264FD52566F30B0095475B /* PhotoResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoResponse.swift; sourceTree = "<group>"; };
+		CF264FDE2567B8000095475B /* SearchViewController+UICollectionViewDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SearchViewController+UICollectionViewDelegate.swift"; sourceTree = "<group>"; };
+		CF264FE12567B8E90095475B /* ViewConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewConstants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +118,7 @@
 				02C6027C2563F0670039622B /* ViewControllers */,
 				02C602722563E4810039622B /* API */,
 				02C602652563E3A80039622B /* Assets.xcassets */,
+				CF264FE12567B8E90095475B /* ViewConstants.swift */,
 				027E772325640A1300E0B66D /* ImageDownloader */,
 				02C602672563E3A80039622B /* LaunchScreen.storyboard */,
 				02C6026A2563E3A80039622B /* Info.plist */,
@@ -126,6 +131,7 @@
 			children = (
 				02C602622563E3A70039622B /* Main.storyboard */,
 				02C602602563E3A70039622B /* SearchViewController.swift */,
+				CF264FDE2567B8000095475B /* SearchViewController+UICollectionViewDelegate.swift */,
 				02C602AF256405C50039622B /* SearchViewModel.swift */,
 				02C602AC256400E10039622B /* ExplorerCollectionViewCell.swift */,
 				02C602A8256400C50039622B /* NewImageCollectionViewCell.swift */,
@@ -157,14 +163,14 @@
 		02C6027F2563F15D0039622B /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				02C602842563F2790039622B /* Photo.swift */,
 				CF264FD52566F30B0095475B /* PhotoResponse.swift */,
+				02C602A12563FA5B0039622B /* SearchPhotoResponse.swift */,
+				02C602842563F2790039622B /* Photo.swift */,
 				02C602912563F3F40039622B /* PhotoLinks.swift */,
 				02C6028E2563F3E60039622B /* CurrentCollection.swift */,
 				02C602992563F4E00039622B /* UserLinks.swift */,
 				02C6029C2563F4F00039622B /* ProfileImage.swift */,
 				02C602962563F4CB0039622B /* PhotoUrls.swift */,
-				02C602A12563FA5B0039622B /* SearchPhotoResponse.swift */,
 				02C6028B2563F3540039622B /* User.swift */,
 			);
 			path = Model;
@@ -272,7 +278,9 @@
 				CF264FCC2566AD9F0095475B /* DetailCollectionViewCellModel.swift in Sources */,
 				02C6028C2563F3540039622B /* User.swift in Sources */,
 				02C602922563F3F40039622B /* PhotoLinks.swift in Sources */,
+				CF264FE22567B8E90095475B /* ViewConstants.swift in Sources */,
 				02C6029D2563F4F00039622B /* ProfileImage.swift in Sources */,
+				CF264FDF2567B8000095475B /* SearchViewController+UICollectionViewDelegate.swift in Sources */,
 				02C602B0256405C50039622B /* SearchViewModel.swift in Sources */,
 				02C602A9256400C50039622B /* NewImageCollectionViewCell.swift in Sources */,
 				02C602762563E4810039622B /* APIClient.swift in Sources */,

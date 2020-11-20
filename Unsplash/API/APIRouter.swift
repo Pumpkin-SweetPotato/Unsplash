@@ -32,8 +32,8 @@ enum APIRouter {
             
             _queryItems.append(.init(name: "client_id", value: clientKey))
         case let .searchPhoto(keyword, page, perPage, orderBy):
-            _queryItems.append(.init(name: "page", value: keyword))
-            _queryItems.append(.init(name: "index", value: String(page)))
+            _queryItems.append(.init(name: "query", value: keyword))
+            _queryItems.append(.init(name: "page", value: String(page)))
             
             _queryItems.append(.init(name: "per_page", value: String(perPage)))
             _queryItems.append(.init(name: "order_by", value: orderBy.rawValue))

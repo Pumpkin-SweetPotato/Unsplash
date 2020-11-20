@@ -10,16 +10,20 @@ import UIKit
 protocol SearchViewInput: AnyObject {
     func viewDidLoad()
     func aboutToReachingBottom()
+    func aboutToReachingBottomSearchResult()
+    func searchTextChanged(_ text: String)
+    func searchBegin()
 }
 
 protocol SearchViewOutput: AnyObject {
     func needReloadExplorerCollectionView()
     func needReloadNewImageCollectionView()
+    func needReloadSearchResultCollectionView()
     func didImageItemAdded(indexPaths: [IndexPath])
+    func didSearchImageItemAdded(indexPaths: [IndexPath])
 }
 
 class SearchViewModel: SearchViewInput {
-    
     weak var searchViewOutput: SearchViewOutput?
     
     let initialState: State
@@ -29,8 +33,14 @@ class SearchViewModel: SearchViewInput {
         var explorerPhotos: [Photo]
         var newImagePhotos: [Photo]
         var newImagePage: Int
+        var searchText: String
+        var searchResultPhotos: [Photo]
+        var searchPage: Int
+        var searchingRequest: URLSessionTask?
         var isRequestingNewPhotos: Bool
         var isLastPageOfNewPhotos: Bool
+        var isLastPageOfSearch: Bool
+        var isLoading: Bool
     }
     
     let apiClient: APIClient = APIClient()
@@ -39,9 +49,15 @@ class SearchViewModel: SearchViewInput {
         initialState = State(
             explorerPhotos: [],
             newImagePhotos: [],
-            newImagePage: 6903,
+            newImagePage: 1,
+            searchText: "",
+            searchResultPhotos: [],
+            searchPage: 1,
+            searchingRequest: nil,
             isRequestingNewPhotos: false,
-            isLastPageOfNewPhotos: false
+            isLastPageOfNewPhotos: false,
+            isLastPageOfSearch: false,
+            isLoading: false
         )
         currentState = initialState
     }
@@ -68,6 +84,7 @@ class SearchViewModel: SearchViewInput {
 
         currentState.isRequestingNewPhotos = true
         currentState.newImagePage += 1
+        
         let beforeCount: Int = currentState.newImagePhotos.count
 
         apiClient.reqeust(PhotoResponse.self, apiRouter: .getPhoto(page: currentState.newImagePage, perPage: 10, orderBy: .latest)) { [weak self] result in
@@ -75,10 +92,7 @@ class SearchViewModel: SearchViewInput {
             self.currentState.isRequestingNewPhotos = false
             switch result {
             case .success(let response):
-                print("isLastPageOfNewPhotos \(self.currentState.isLastPageOfNewPhotos)")
-                print("response.isLastPage \(response.isLastPage)")
                 self.currentState.isLastPageOfNewPhotos = response.isLastPage
-                print("isLastPageOfNewPhotos \(self.currentState.isLastPageOfNewPhotos)")
                 self.currentState.newImagePhotos.append(contentsOf: response.photos)
                 var addedIndexPaths: [IndexPath] = []
 
@@ -91,6 +105,85 @@ class SearchViewModel: SearchViewInput {
                 print("error \(error)")
             }
         }
+    }
+    
+    func searchCancel() {
+        currentState.searchText = ""
+        currentState.searchPage = 1
+        currentState.searchingRequest?.cancel()
+        currentState.searchingRequest = nil
+    }
+    
+    func searchTextChanged(_ text: String) {
+        currentState.searchText = text
+        currentState.searchPage = 1
+    }
+    
+    func searchBegin() {
+        guard !currentState.searchText.isEmpty else {
+            print("Keyword is empty.")
+            return
+        }
+        
+        if currentState.searchingRequest != nil {
+            currentState.searchingRequest?.cancel()
+            currentState.searchingRequest = nil
+        }
+        
+        let keyword = currentState.searchText
+        print("Search keyword :\(keyword)")
+        
+        let request = apiClient.reqeust(SearchPhotoResponse.self, apiRouter: .searchPhoto(keyword: keyword, page: currentState.searchPage)) { [weak self] result in
+            guard let self = self else { return }
+            self.currentState.isRequestingNewPhotos = false
+            switch result {
+            case .success(let response):
+                self.currentState.searchResultPhotos = response.results
+                self.searchViewOutput?.needReloadSearchResultCollectionView()
+            case .failure(let error):
+                print("error \(error)")
+            }
+            
+            self.currentState.isLoading = false
+        }
+        
+        self.currentState.searchingRequest = request
+        
+        if request != nil {
+            self.currentState.isLoading = true
+        }
+    }
+    
+    func aboutToReachingBottomSearchResult() {
+        guard !currentState.isLastPageOfSearch else {
+            print("This is last page.")
+            return
+        }
+        
+        let keyword = currentState.searchText
+        currentState.searchPage += 1
+        
+        let beforeCount = currentState.searchResultPhotos.count
+        
+        let request = apiClient.reqeust(SearchPhotoResponse.self, apiRouter: .searchPhoto(keyword: keyword, page: currentState.searchPage)) { [weak self] result in
+            guard let self = self else { return }
+            self.currentState.isRequestingNewPhotos = false
+            switch result {
+            case .success(let response):
+                self.currentState.searchResultPhotos.append(contentsOf: response.results)
+                
+                var addedIndexPaths: [IndexPath] = []
+                for index in beforeCount ..< self.currentState.searchResultPhotos.count {
+                    addedIndexPaths.append(IndexPath(row: index, section: 0))
+                }
+                
+                self.searchViewOutput?.didSearchImageItemAdded(indexPaths: addedIndexPaths)
+            case .failure(let error):
+                print("error \(error)")
+            }
+        }
+        
+        currentState.searchingRequest = request
     }
     
 }
