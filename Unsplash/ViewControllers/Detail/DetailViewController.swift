@@ -41,11 +41,15 @@ final class DetailViewController: UIViewController {
 
     let infoButton: UIButton = {
         let infoButton = UIButton(type: .system)
+        
         if #available(iOS 13.0, *) {
-            infoButton.setImage(UIImage(systemName: "info.cirle"), for: .normal)
+            infoButton.setImage(UIImage(systemName: "info.circle"), for: .normal)
+            infoButton.tintColor = .white
         } else {
+            infoButton.setTitle("Info", for: .normal)
             // Fallback on earlier versions
         }
+        
         
         return infoButton
     }()
@@ -62,16 +66,40 @@ final class DetailViewController: UIViewController {
 
     let likeButton: UIButton = {
         let likeButton = UIButton(type: .system)
+        
+        if #available(iOS 13.0, *) {
+            likeButton.setImage(UIImage(systemName: "suit.heart.fill"), for: .normal)
+            likeButton.tintColor = .white
+        } else {
+            likeButton.setTitle("Like", for: .normal)
+        }
+        
         return likeButton
     }()
 
     let plusButton: UIButton = {
         let plusButton = UIButton(type: .system)
+        
+        if #available(iOS 13.0, *) {
+            plusButton.setImage(UIImage(systemName: "plus"), for: .normal)
+            plusButton.tintColor = .white
+        } else {
+            plusButton.setTitle("Add", for: .normal)
+        }
+        
         return plusButton
     }()
 
     let downloadButton: UIButton = {
         let downloadButton = UIButton(type: .system)
+        downloadButton.backgroundColor = .white
+        if #available(iOS 13.0, *) {
+            downloadButton.setImage(UIImage(systemName: "arrow.down"), for: .normal)
+            downloadButton.tintColor = .black
+        } else {
+            downloadButton.setTitle("Down", for: .normal)
+        }
+        
         return downloadButton
     }()
 
@@ -158,7 +186,7 @@ final class DetailViewController: UIViewController {
 
         NSLayoutConstraint.activate([
             closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            closeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            closeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: ViewConstants.leading),
             closeButton.widthAnchor.constraint(equalToConstant: 25),
             closeButton.heightAnchor.constraint(equalToConstant: 25)
         ])
@@ -176,21 +204,21 @@ final class DetailViewController: UIViewController {
 
         NSLayoutConstraint.activate([
             shareButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            shareButton.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            shareButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -ViewConstants.trailing)
         ])
 
         infoButton.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            infoButton.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            infoButton.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            infoButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: ViewConstants.leading),
+            infoButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -15)
         ])
 
         verticalButtonStackView.translatesAutoresizingMaskIntoConstraints = false
-
+        
         NSLayoutConstraint.activate([
-            verticalButtonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            verticalButtonStackView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            verticalButtonStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -ViewConstants.trailing),
+            verticalButtonStackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -15)
         ])
     }
     
