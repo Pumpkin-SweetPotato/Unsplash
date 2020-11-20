@@ -18,6 +18,7 @@ extension SearchViewController: UICollectionViewDelegate {
                 let detailViewController = DetailViewController(detailViewModel: detailViewModel)
                 
                 detailViewController.modalPresentationStyle = .overFullScreen
+                detailViewController.dismissDelegate = self
 
                 self.present(detailViewController, animated: true)
             case searchResultCollectionView:
@@ -26,6 +27,7 @@ extension SearchViewController: UICollectionViewDelegate {
                 let detailViewController = DetailViewController(detailViewModel: detailViewModel)
                 
                 detailViewController.modalPresentationStyle = .overFullScreen
+                detailViewController.dismissDelegate = self
 
                 self.present(detailViewController, animated: true)
             
@@ -61,16 +63,7 @@ extension SearchViewController: FlexibleHeightCollectionViewLayoutDelegate {
 
 extension SearchViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        switch collectionView {
-        case explorerCollectionView:
-            return explorerCellSize
-        case newImagesCollectionView:
-            return newImageCellSize
-        case searchResultCollectionView:
-            return newImageCellSize
-        default:
-            return .zero
-        }
+        UICollectionViewFlowLayout.automaticSize
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {

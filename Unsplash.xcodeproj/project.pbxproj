@@ -29,6 +29,7 @@
 		02C602A9256400C50039622B /* NewImageCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C602A8256400C50039622B /* NewImageCollectionViewCell.swift */; };
 		02C602AD256400E10039622B /* ExplorerCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C602AC256400E10039622B /* ExplorerCollectionViewCell.swift */; };
 		02C602B0256405C50039622B /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02C602AF256405C50039622B /* SearchViewModel.swift */; };
+		CF12E29D25682C0D0045F1E4 /* ViewControllerDismissDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF12E29C25682C0D0045F1E4 /* ViewControllerDismissDelegate.swift */; };
 		CF264FC52566ABB60095475B /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF264FC12566ABB60095475B /* DetailViewController.swift */; };
 		CF264FC72566ABB60095475B /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF264FC32566ABB60095475B /* DetailViewModel.swift */; };
 		CF264FC82566ABB60095475B /* DetailCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF264FC42566ABB60095475B /* DetailCollectionViewCell.swift */; };
@@ -64,6 +65,7 @@
 		02C602A8256400C50039622B /* NewImageCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewImageCollectionViewCell.swift; sourceTree = "<group>"; };
 		02C602AC256400E10039622B /* ExplorerCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExplorerCollectionViewCell.swift; sourceTree = "<group>"; };
 		02C602AF256405C50039622B /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
+		CF12E29C25682C0D0045F1E4 /* ViewControllerDismissDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerDismissDelegate.swift; sourceTree = "<group>"; };
 		CF264FC12566ABB60095475B /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		CF264FC32566ABB60095475B /* DetailViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
 		CF264FC42566ABB60095475B /* DetailCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailCollectionViewCell.swift; sourceTree = "<group>"; };
@@ -156,6 +158,7 @@
 			children = (
 				CF264FC02566ABB60095475B /* Detail */,
 				02C602712563E4470039622B /* Main */,
+				CF12E29C25682C0D0045F1E4 /* ViewControllerDismissDelegate.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -260,6 +263,7 @@
 				027E772525640A2200E0B66D /* ImageOperation.swift in Sources */,
 				02C602852563F2790039622B /* Photo.swift in Sources */,
 				027E77212564097400E0B66D /* NewImageCollectionViewCellModel.swift in Sources */,
+				CF12E29D25682C0D0045F1E4 /* ViewControllerDismissDelegate.swift in Sources */,
 				02C602612563E3A70039622B /* SearchViewController.swift in Sources */,
 				02C602782563E4820039622B /* APIRouter.swift in Sources */,
 				02C602772563E4820039622B /* APIConstants.swift in Sources */,

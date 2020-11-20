@@ -16,6 +16,7 @@ protocol SearchViewInput: AnyObject {
 }
 
 protocol SearchViewOutput: AnyObject {
+    func setTopPhoto(_ photo: Photo)
     func needReloadExplorerCollectionView()
     func needReloadNewImageCollectionView()
     func needReloadSearchResultCollectionView()
@@ -30,6 +31,7 @@ class SearchViewModel: SearchViewInput {
     var currentState: State
     
     struct State {
+        var topImage: UIImage?
         var explorerPhotos: [Photo]
         var newImagePhotos: [Photo]
         var newImagePage: Int
@@ -47,6 +49,7 @@ class SearchViewModel: SearchViewInput {
     
     init() {
         initialState = State(
+            topImage: nil,
             explorerPhotos: [],
             newImagePhotos: [],
             newImagePage: 1,
@@ -69,6 +72,7 @@ class SearchViewModel: SearchViewInput {
                 self?.currentState.newImagePhotos = response.photos
                 self?.currentState.isLastPageOfNewPhotos = response.isLastPage
                 self?.searchViewOutput?.needReloadNewImageCollectionView()
+                self?.setTopPhoto(Array(response.photos[1...]))
             case .failure(let error):
                 print("error \(error)")
             }
@@ -186,4 +190,10 @@ class SearchViewModel: SearchViewInput {
         currentState.searchingRequest = request
     }
     
+    
+    func setTopPhoto(_ photos: [Photo]) {
+        guard let randomPhoto = photos.randomElement() else { return }
+        
+        searchViewOutput?.setTopPhoto(randomPhoto)
+    }
 }

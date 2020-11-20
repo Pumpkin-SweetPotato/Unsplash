@@ -23,7 +23,11 @@ protocol DetailViewOutput: AnyObject {
 
 class DetailViewModel: DetailViewInput {
         
-    weak var detailViewOutput: DetailViewOutput?
+    weak var detailViewOutput: DetailViewOutput? {
+        didSet {
+            detailViewOutput?.setArtistName(currentState.currentArtistName)
+        }
+    }
     
     let initialState: State
     var currentState: State

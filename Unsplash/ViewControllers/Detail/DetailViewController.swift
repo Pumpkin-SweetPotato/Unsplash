@@ -9,7 +9,7 @@ import UIKit
 
 final class DetailViewController: UIViewController {
     let closeButton: UIButton = {
-        let closeButton = UIButton()
+        let closeButton = UIButton(type: .system)
         closeButton.tintColor = .white
         if #available(iOS 13.0, *) {
             closeButton.setImage(UIImage(systemName: "xmark"), for: .normal)
@@ -29,7 +29,7 @@ final class DetailViewController: UIViewController {
     }()
 
     let shareButton: UIButton = {
-        let shareButton = UIButton()
+        let shareButton = UIButton(type: .system)
         shareButton.tintColor = .white
         if #available(iOS 13.0, *) {
             shareButton.setImage(UIImage(systemName: "square.and.arrow.up"), for: .normal)
@@ -40,7 +40,7 @@ final class DetailViewController: UIViewController {
     }()
 
     let infoButton: UIButton = {
-        let infoButton = UIButton()
+        let infoButton = UIButton(type: .system)
         if #available(iOS 13.0, *) {
             infoButton.setImage(UIImage(systemName: "info.cirle"), for: .normal)
         } else {
@@ -61,17 +61,17 @@ final class DetailViewController: UIViewController {
     }()
 
     let likeButton: UIButton = {
-        let likeButton = UIButton()
+        let likeButton = UIButton(type: .system)
         return likeButton
     }()
 
     let plusButton: UIButton = {
-        let plusButton = UIButton()
+        let plusButton = UIButton(type: .system)
         return plusButton
     }()
 
     let downloadButton: UIButton = {
-        let downloadButton = UIButton()
+        let downloadButton = UIButton(type: .system)
         return downloadButton
     }()
 
@@ -82,12 +82,12 @@ final class DetailViewController: UIViewController {
         let imageCollectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         imageCollectionView.register(DetailCollectionViewCell.self, forCellWithReuseIdentifier: DetailCollectionViewCell.reuseIdentifier)
         imageCollectionView.showsHorizontalScrollIndicator = false
-//        imageCollectionView.decelerationRate = .fast
         
         return imageCollectionView
     }()
     
     var detailViewModel: DetailViewModel!
+    weak var dismissDelegate: ViewControllerDismissDelegate?
     var initialIndexLayouted: Bool = false
 
     init(detailViewModel: DetailViewModel) {
@@ -200,7 +200,7 @@ final class DetailViewController: UIViewController {
     
     @objc
     func closeButtonTapped() {
-        self.dismiss(animated: true, completion: nil)
+        dismissDelegate?.dismissCalledFromChild(lastIndexPath: detailViewModel.currentState.currentIndex)
     }
 }
 
@@ -235,17 +235,8 @@ extension DetailViewController: UICollectionViewDelegateFlowLayout {
             index = min(imageCount - 1, index)
         }
         let targetIndexPath = IndexPath(row: index, section: 0)
-//        DispatchQueue.main.async {
-//            self.artistNameLabel.text = self.detailViewModel.currentState.photos[index].user.username
-//        UIView.animate(withDuration: 0.5) {
-            self.imageCollectionView.scrollToItem(at: targetIndexPath, at: .left, animated: true)
-//        } completion: { _ in
-            self.detailViewModel.currentIndexChanged(indexPath: targetIndexPath)
-//            }
-
-        
-        
-//        }
+        imageCollectionView.scrollToItem(at: targetIndexPath, at: .centeredHorizontally, animated: true)
+        detailViewModel.currentIndexChanged(indexPath: targetIndexPath)
     }
 }
 
@@ -276,4 +267,3 @@ extension DetailViewController: DetailViewOutput {
         self.artistNameLabel.text = artistName
     }
 }
-

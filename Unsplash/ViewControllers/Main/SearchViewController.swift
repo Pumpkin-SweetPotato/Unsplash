@@ -10,33 +10,42 @@ import UIKit
 class SearchViewController: UIViewController {
 
     private let rootView: UIView = UIView()
-    private let scrollView: UIScrollView = UIScrollView()
+    private let superScrollView: UIScrollView = {
+        let superScrollView = UIScrollView()
+        superScrollView.showsVerticalScrollIndicator = false
+        return superScrollView
+    }()
     private let scrollContentView: UIView = UIView()
     
     //
     private let topContainer: UIView = {
         let topContainer = UIView()
-        topContainer.backgroundColor = .red
+        topContainer.clipsToBounds = true
         
         return topContainer
     }()
     
     private let topImageView: UIImageView = {
         let topImageView = UIImageView()
+        topImageView.contentMode = .scaleAspectFill
         
         return topImageView
     }()
     
     private let appInfoButton: UIButton = {
-        let appInfoButton = UIButton()
-        appInfoButton.setTitle("App", for: .normal)
+        let appInfoButton = UIButton(type: .system)
+        let iconImage = UIImage(named: "unsplashIcon")?.withRenderingMode(.alwaysTemplate)
+        appInfoButton.setImage(iconImage, for: .normal)
+        appInfoButton.tintColor = .white
         
         return appInfoButton
     }()
     
     private let userInfoButton: UIButton = {
-        let userInfoButton = UIButton()
-        userInfoButton.setTitle("User", for: .normal)
+        let userInfoButton = UIButton(type: .system)
+        let iconImage = UIImage(named: "userIcon")?.withRenderingMode(.alwaysTemplate)
+        userInfoButton.setImage(iconImage, for: .normal)
+        userInfoButton.tintColor = .white
         
         return userInfoButton
     }()
@@ -55,9 +64,8 @@ class SearchViewController: UIViewController {
         let searchBar = UISearchBar()
         searchBar.searchBarStyle = .minimal
         searchBar.placeholder = "Search photos"
-//        searchBar.searchTextField.textColor = .white
-//        searchBar.setImage(UIImage(systemName: "magnifyingglass"), for: .search, state: .normal)
-        
+        searchBar.isTranslucent = false
+
         return searchBar
     }()
     
@@ -112,7 +120,7 @@ class SearchViewController: UIViewController {
     
     private let newImagesContainer: UIView = {
         let newImagesContainer = UIView()
-        newImagesContainer.backgroundColor = .gray
+        newImagesContainer.backgroundColor = .white
         
         return newImagesContainer
     }()
@@ -151,10 +159,19 @@ class SearchViewController: UIViewController {
     }()
     
     var searchViewModel: SearchViewModel!
+    var scrollGoingUp: Bool?
+    var childScrollingDownDueToParent: Bool = false
+    var topContainerHeightConstraint: NSLayoutConstraint!
+    let stickeyViewHeight: CGFloat = 50
+    var beforeContentOffset: CGPoint!
     
-    lazy var explorerCellSize: CGSize = CGSize(width: explorerCollectionView.bounds.size.width - ViewConstants.leading * 2, height: 150)
-    lazy var newImageCellSize: CGSize = CGSize(width: explorerCollectionView.bounds.size.width - ViewConstants.leading * 2, height: 300)
-
+    enum ViewMode {
+        case normal
+        case search
+    }
+    
+    var viewMode: ViewMode = .normal
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -171,20 +188,22 @@ class SearchViewController: UIViewController {
         setDelegates()
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         
-        
+        if let textField = searchBar.value(forKey: "searchField") as? UITextField,
+           let placeholderLabel = textField.value(forKey: "placeholderLabel") as? UILabel {
+            let glassIconView = textField.leftView as? UIImageView
+            glassIconView?.tintColor = .white
+            
+            placeholderLabel.textColor = .white
+        }
     }
     
-    override func updateViewConstraints() {
-        super.updateViewConstraints()
-    }
-
     private func addViews() {
         view.addSubview(rootView)
-        rootView.addSubview(scrollView)
-        scrollView.addSubview(scrollContentView)
+        rootView.addSubview(superScrollView)
+        superScrollView.addSubview(scrollContentView)
         
         scrollContentView.addSubview(topContainer)
 
@@ -205,8 +224,11 @@ class SearchViewController: UIViewController {
         newImagesContainer.addSubview(newImageLabel)
         newImagesContainer.addSubview(newImagesCollectionView)
         
-        bottomStackView.addArrangedSubview(searchContainer)
+        scrollContentView.addSubview(searchContainer)
+//        bottomStackView.addArrangedSubview(searchContainer)
         searchContainer.addSubview(searchResultCollectionView)
+        
+        scrollContentView.bringSubviewToFront(topContainer)
     }
     
     private func setConstraints() {
@@ -221,38 +243,36 @@ class SearchViewController: UIViewController {
             rootView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        superScrollView.translatesAutoresizingMaskIntoConstraints = false
         
-        scrollView.contentInsetAdjustmentBehavior = .never
+        superScrollView.contentInsetAdjustmentBehavior = .never
         
         NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: rootView.topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor),
-            scrollView.heightAnchor.constraint(equalTo: rootView.heightAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: rootView.bottomAnchor)
+            superScrollView.topAnchor.constraint(equalTo: rootView.topAnchor),
+            superScrollView.leadingAnchor.constraint(equalTo: rootView.leadingAnchor),
+            superScrollView.heightAnchor.constraint(equalTo: rootView.heightAnchor),
+            superScrollView.trailingAnchor.constraint(equalTo: rootView.trailingAnchor),
+            superScrollView.bottomAnchor.constraint(equalTo: rootView.bottomAnchor)
         ])
         
         scrollContentView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            scrollContentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            scrollContentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            scrollContentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
-            scrollContentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            scrollContentView.heightAnchor.constraint(greaterThanOrEqualTo: scrollView.heightAnchor),
-            scrollContentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor)
+            scrollContentView.topAnchor.constraint(equalTo: superScrollView.topAnchor),
+            scrollContentView.leadingAnchor.constraint(equalTo: superScrollView.leadingAnchor),
+            scrollContentView.widthAnchor.constraint(equalTo: superScrollView.widthAnchor),
+            scrollContentView.trailingAnchor.constraint(equalTo: superScrollView.trailingAnchor),
+            scrollContentView.heightAnchor.constraint(greaterThanOrEqualTo: superScrollView.heightAnchor),
+            scrollContentView.bottomAnchor.constraint(equalTo: superScrollView.bottomAnchor)
         ])
         
-        scrollContentView.backgroundColor = .brown
-        
         topContainer.translatesAutoresizingMaskIntoConstraints = false
-        topContainer.backgroundColor = .cyan
-//
+        topContainerHeightConstraint = topContainer.heightAnchor.constraint(equalToConstant: view.frame.height * 0.43)
+        
         NSLayoutConstraint.activate([
             topContainer.topAnchor.constraint(equalTo: scrollContentView.topAnchor),
             topContainer.leadingAnchor.constraint(equalTo: scrollContentView.leadingAnchor),
-            topContainer.heightAnchor.constraint(equalTo: view.heightAnchor, multiplier: 0.43),
+            topContainerHeightConstraint,
             topContainer.trailingAnchor.constraint(equalTo: scrollContentView.trailingAnchor),
             topContainer.widthAnchor.constraint(equalTo: scrollContentView.widthAnchor)
         ])
@@ -272,8 +292,8 @@ class SearchViewController: UIViewController {
         NSLayoutConstraint.activate([
             appInfoButton.leadingAnchor.constraint(equalTo: topContainer.leadingAnchor, constant: ViewConstants.leading),
             appInfoButton.topAnchor.constraint(equalTo: topContainer.topAnchor, constant: 30),
-            appInfoButton.widthAnchor.constraint(equalToConstant: 35),
-            appInfoButton.heightAnchor.constraint(equalToConstant: 35),
+            appInfoButton.widthAnchor.constraint(equalToConstant: 20),
+            appInfoButton.heightAnchor.constraint(equalToConstant: 20),
         ])
         
         userInfoButton.translatesAutoresizingMaskIntoConstraints = false
@@ -281,8 +301,8 @@ class SearchViewController: UIViewController {
         NSLayoutConstraint.activate([
             userInfoButton.trailingAnchor.constraint(equalTo: topContainer.trailingAnchor, constant: -ViewConstants.trailing),
             userInfoButton.topAnchor.constraint(equalTo: topContainer.topAnchor, constant: 30),
-            userInfoButton.widthAnchor.constraint(equalToConstant: 35),
-            userInfoButton.heightAnchor.constraint(equalToConstant: 35),
+            userInfoButton.widthAnchor.constraint(equalToConstant: 20),
+            userInfoButton.heightAnchor.constraint(equalToConstant: 20),
         ])
         
         keytakeawayLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -347,9 +367,7 @@ class SearchViewController: UIViewController {
         ])
 
         newImagesContainer.translatesAutoresizingMaskIntoConstraints = false
-        newImagesContainer.backgroundColor = .white
         
-
         NSLayoutConstraint.activate([
             newImagesContainer.topAnchor.constraint(equalTo: explorerContainer.bottomAnchor),
             newImagesContainer.widthAnchor.constraint(equalTo: bottomExplorerImageContainer.widthAnchor),
@@ -371,25 +389,32 @@ class SearchViewController: UIViewController {
         NSLayoutConstraint.activate([
             newImagesCollectionView.topAnchor.constraint(equalTo: newImageLabel.bottomAnchor),
             newImagesCollectionView.leadingAnchor.constraint(equalTo: newImagesContainer.leadingAnchor),
-            newImagesCollectionView.heightAnchor.constraint(equalTo: view.heightAnchor),
+            newImagesCollectionView.heightAnchor.constraint(equalTo: view.heightAnchor, constant: -stickeyViewHeight),
             newImagesCollectionView.trailingAnchor.constraint(equalTo: newImagesContainer.trailingAnchor),
             newImagesCollectionView.bottomAnchor.constraint(equalTo: newImagesContainer.bottomAnchor),
         ])
         
         searchContainer.translatesAutoresizingMaskIntoConstraints = false
-
+        
+        NSLayoutConstraint.activate([
+            searchContainer.topAnchor.constraint(equalTo: scrollContentView.topAnchor),
+            searchContainer.widthAnchor.constraint(equalTo: scrollContentView.widthAnchor),
+            searchContainer.heightAnchor.constraint(equalTo: scrollContentView.heightAnchor),
+            searchContainer.bottomAnchor.constraint(equalTo: scrollContentView.bottomAnchor)
+        ])
+        
         searchResultCollectionView.translatesAutoresizingMaskIntoConstraints = false
-
+        
         NSLayoutConstraint.activate([
             searchResultCollectionView.topAnchor.constraint(equalTo: searchContainer.topAnchor),
-            searchResultCollectionView.heightAnchor.constraint(equalTo: view.heightAnchor),
             searchResultCollectionView.widthAnchor.constraint(equalTo: searchContainer.widthAnchor),
+            searchResultCollectionView.heightAnchor.constraint(equalTo: searchContainer.heightAnchor),
             searchResultCollectionView.bottomAnchor.constraint(equalTo: searchContainer.bottomAnchor)
         ])
     }
 
     private func setDelegates() {
-        scrollView.delegate = self
+        superScrollView.delegate = self
         searchBar.delegate = self
         explorerCollectionView.delegate = self
         explorerCollectionView.dataSource = self
@@ -404,6 +429,40 @@ class SearchViewController: UIViewController {
         
         if let layout = searchResultCollectionView.collectionViewLayout as?  FlexibleHeightCollectionViewLayout {
             layout.delegate = self
+        }
+    }
+    
+    func setViewMode(_ viewMode: ViewMode) {
+        self.viewMode = viewMode
+        DispatchQueue.main.async {
+            switch viewMode {
+            case .normal:
+                self.superScrollView.isScrollEnabled = true
+                self.searchViewModel.searchCancel()
+                self.searchBar.resignFirstResponder()
+                self.searchBar.setShowsCancelButton(false, animated: true)
+                self.superScrollView.contentOffset = self.beforeContentOffset
+                
+                self.bottomStackView.isHidden = false
+                self.searchContainer.isHidden = true
+            case .search:
+                self.superScrollView.isScrollEnabled = false
+                self.searchBar.setShowsCancelButton(true, animated: true)
+                
+                if let cancelButton = self.searchBar.value(forKey: "cancelButton") as? UIButton {
+                    cancelButton.tintColor = .white
+                }
+                
+                self.beforeContentOffset = self.superScrollView.contentOffset
+            
+                self.superScrollView.contentOffset.y = self.superScrollView.contentSize.height - self.superScrollView.frame.height
+                
+                self.searchResultCollectionView.transform =
+                    CGAffineTransform(translationX: 0, y: self.superScrollView.contentSize.height - self.superScrollView.frame.height + self.stickeyViewHeight)
+                
+                self.bottomStackView.isHidden = true
+                self.searchContainer.isHidden = false
+            }
         }
     }
 
@@ -432,6 +491,7 @@ extension SearchViewController: SearchViewOutput {
     func needReloadSearchResultCollectionView() {
         DispatchQueue.main.async {
             self.searchResultCollectionView.reloadData()
+            self.searchResultCollectionView.contentOffset = .zero
         }
     }
     
@@ -460,25 +520,56 @@ extension SearchViewController {
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let contentY = scrollView.contentOffset.y
-
+        scrollGoingUp = scrollView.panGestureRecognizer.translation(in: scrollView).y < 0
+        
+        let parentViewMaxContentYOffset = superScrollView.contentSize.height - superScrollView.frame.height
+        
+        if scrollGoingUp == true {
+            if scrollView == newImagesCollectionView {
+                if superScrollView.contentOffset.y < parentViewMaxContentYOffset && !childScrollingDownDueToParent {
+                    superScrollView.contentOffset.y = min(superScrollView.contentOffset.y + newImagesCollectionView.contentOffset.y, parentViewMaxContentYOffset)
+                    
+                    newImagesCollectionView.contentOffset.y = 0
+                }
+            }
+            
+        } else {
+            if scrollView == newImagesCollectionView {
+                if newImagesCollectionView.contentOffset.y < 0 && superScrollView.contentOffset.y > 0 {
+                    superScrollView.contentOffset.y = max(superScrollView.contentOffset.y - abs(newImagesCollectionView.contentOffset.y), 0)
+                }
+            }
+            
+            if scrollView == superScrollView {
+                if newImagesCollectionView.contentOffset.y > 0 && superScrollView.contentOffset.y < parentViewMaxContentYOffset {
+                    childScrollingDownDueToParent = true
+                    
+                    newImagesCollectionView.contentOffset.y = max(newImagesCollectionView.contentOffset.y - (parentViewMaxContentYOffset - superScrollView.contentOffset.y), 0)
+                    
+                    superScrollView.contentOffset.y = parentViewMaxContentYOffset
+                    
+                    childScrollingDownDueToParent = false
+                }
+            }
+        }
+        
+//        if scrollView != searchResultCollectionView {
+//            let contentOffsetY = superScrollView.contentOffset.y
+//
+//            keytakeawayLabel.transform = CGAffineTransform(translationX: 0, y: contentOffsetY * 0.135)
+//
+//            keytakeawayLabel.alpha = 1 / max(contentOffsetY, 1) * 50
+//
+//            searchBar.transform = CGAffineTransform(translationX: 0, y: contentOffsetY * 0.135)
+//
+//            topContainer.transform = CGAffineTransform(translationX: 0, y: contentOffsetY * (topContainer.frame.height - stickeyViewHeight + 25) / parentViewMaxContentYOffset)
+//        }
     }
 }
 
 extension SearchViewController: UISearchBarDelegate {
-    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
-        print("searchBarShouldBeginEditing")
-        return true
-    }
-    
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-        DispatchQueue.main.async {
-            searchBar.setShowsCancelButton(true, animated: true)
-            self.explorerContainer.isHidden = true
-            self.newImagesContainer.isHidden = true
-            self.searchResultCollectionView.isHidden = false
-            self.bottomStackView.layoutIfNeeded()
-        }
+        setViewMode(.search)
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
@@ -486,17 +577,38 @@ extension SearchViewController: UISearchBarDelegate {
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        searchViewModel.searchCancel()
-        DispatchQueue.main.async {
-            searchBar.resignFirstResponder()
-            searchBar.setShowsCancelButton(false, animated: true)
-            self.searchResultCollectionView.isHidden = true
-            self.explorerContainer.isHidden = false
-            self.newImagesContainer.isHidden = false
-        }
+        setViewMode(.normal)
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchViewModel.searchBegin()
+    }
+    
+    func setTopPhoto(_ photo: Photo) {
+        ImageDownloadManager.shared.downloadImage(photo.urls.regular) { [weak self] (image, _, _, _) in
+            DispatchQueue.main.async {
+                self?.topImageView.image = image
+                self?.artistNameLabel.text = "Photo by \(photo.user.username)"
+            }
+        }
+    }
+}
+
+extension SearchViewController: ViewControllerDismissDelegate {
+    func dismissCalledFromChild(lastIndexPath: IndexPath) {
+//        self.superScrollView.contentOffset.y = self.superScrollView.contentSize.height - self.superScrollView.frame.height
+//
+//        self.superScrollView.layoutIfNeeded()
+//
+//        switch self.viewMode {
+//        case .normal:
+//            self.newImagesCollectionView.scrollToItem(at: lastIndexPath, at: .centeredVertically, animated: false)
+//        case .search:
+//
+//            self.searchResultCollectionView.scrollToItem(at: lastIndexPath, at: .centeredVertically, animated: false)
+//        }
+//
+        self.presentedViewController?.dismiss(animated: true, completion: nil)
+        
     }
 }
