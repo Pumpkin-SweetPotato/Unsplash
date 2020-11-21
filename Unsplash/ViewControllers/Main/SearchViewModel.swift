@@ -22,6 +22,7 @@ protocol SearchViewOutput: AnyObject {
     func needReloadSearchResultCollectionView()
     func didImageItemAdded(indexPaths: [IndexPath])
     func didSearchImageItemAdded(indexPaths: [IndexPath])
+    func isLoading(_ isLoading: Bool)
 }
 
 class SearchViewModel: SearchViewInput {
@@ -42,7 +43,6 @@ class SearchViewModel: SearchViewInput {
         var isRequestingNewPhotos: Bool
         var isLastPageOfNewPhotos: Bool
         var isLastPageOfSearch: Bool
-        var isLoading: Bool
     }
     
     let apiClient: APIClient = APIClient()
@@ -59,13 +59,14 @@ class SearchViewModel: SearchViewInput {
             searchingRequest: nil,
             isRequestingNewPhotos: false,
             isLastPageOfNewPhotos: false,
-            isLastPageOfSearch: false,
-            isLoading: false
+            isLastPageOfSearch: false
         )
         currentState = initialState
     }
     
     func viewDidLoad() {
+        searchViewOutput?.isLoading(true)
+        
         apiClient.reqeust(PhotoResponse.self, apiRouter: .getPhoto(page: currentState.newImagePage, perPage: 10, orderBy: .latest)) { [weak self] result in
             switch result {
             case .success(let response):
@@ -76,6 +77,8 @@ class SearchViewModel: SearchViewInput {
             case .failure(let error):
                 print("error \(error)")
             }
+            
+            self?.searchViewOutput?.isLoading(false)
         }
     }
     
@@ -135,7 +138,6 @@ class SearchViewModel: SearchViewInput {
         }
         
         let keyword = currentState.searchText
-        print("Search keyword :\(keyword)")
         
         let request = apiClient.reqeust(SearchPhotoResponse.self, apiRouter: .searchPhoto(keyword: keyword, page: currentState.searchPage)) { [weak self] result in
             guard let self = self else { return }
@@ -148,13 +150,13 @@ class SearchViewModel: SearchViewInput {
                 print("error \(error)")
             }
             
-            self.currentState.isLoading = false
+            self.searchViewOutput?.isLoading(false)
         }
         
         self.currentState.searchingRequest = request
         
         if request != nil {
-            self.currentState.isLoading = true
+            self.searchViewOutput?.isLoading(true)
         }
     }
     

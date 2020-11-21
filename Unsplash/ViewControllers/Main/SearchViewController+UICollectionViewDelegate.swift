@@ -63,15 +63,26 @@ extension SearchViewController: FlexibleHeightCollectionViewLayoutDelegate {
 
 extension SearchViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        UICollectionViewFlowLayout.automaticSize
+        if collectionView != explorerCollectionView {
+            return UICollectionViewFlowLayout.automaticSize
+        }
+        
+        return CGSize(width: collectionView.bounds.width - (ViewConstants.leading + ViewConstants.trailing), height: 170)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        .zero
+        if collectionView != explorerCollectionView {
+            return .zero
+        }
+        return .init(top: 0, left: 15, bottom: 0, right: 15)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        .zero
+        if collectionView != explorerCollectionView {
+            return .zero
+        }
+        
+        return 10
     }
 }
 
@@ -83,7 +94,7 @@ extension SearchViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         switch collectionView {
         case explorerCollectionView:
-            return searchViewModel.currentState.explorerPhotos.count
+            return 4
         case newImagesCollectionView:
             return searchViewModel.currentState.newImagePhotos.count
         case searchResultCollectionView:
@@ -99,7 +110,6 @@ extension SearchViewController: UICollectionViewDataSource {
             guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ExplorerCollectionViewCell.reuseIdentifier, for: indexPath)
                     as? ExplorerCollectionViewCell else { fatalError() }
 
-            let photo = searchViewModel.currentState.explorerPhotos[indexPath.row]
             
             return cell
         case newImagesCollectionView:

@@ -100,10 +100,10 @@ final class DetailViewController: UIViewController, PhotoDetail {
 
     private let downloadButton: UIButton = {
         let downloadButton = UIButton(type: .system)
-        downloadButton.backgroundColor = .white
+//        downloadButton.backgroundColor = .white
         if #available(iOS 13.0, *) {
             downloadButton.setImage(UIImage(systemName: "arrow.down"), for: .normal)
-            downloadButton.tintColor = .black
+            downloadButton.tintColor = .white
         } else {
             downloadButton.setTitle("Down", for: .normal)
         }

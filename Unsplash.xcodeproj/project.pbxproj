@@ -169,11 +169,11 @@
 			children = (
 				CF0B9E7A25685892000A4C14 /* Main.storyboard */,
 				CF0B9E7625685892000A4C14 /* SearchViewController.swift */,
+				CF0B9E7C25685892000A4C14 /* SearchViewModel.swift */,
 				CF0B9E7525685892000A4C14 /* SearchViewController+UICollectionViewDelegate.swift */,
 				CF0B9E7725685892000A4C14 /* NewImageCollectionViewCell.swift */,
 				CF0B9E7825685892000A4C14 /* ExplorerCollectionViewCell.swift */,
 				CF0B9E7925685892000A4C14 /* FlexibleHeightCollectionViewLayout.swift */,
-				CF0B9E7C25685892000A4C14 /* SearchViewModel.swift */,
 				CF0B9E7D25685892000A4C14 /* NewImageCollectionViewCellModel.swift */,
 			);
 			path = Main;

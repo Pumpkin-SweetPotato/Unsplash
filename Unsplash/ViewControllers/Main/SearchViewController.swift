@@ -14,12 +14,21 @@ protocol PhotoSearch: class {
 }
 
 class SearchViewController: UIViewController, PhotoSearch {
+    
+    private let indicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView()
+        indicator.hidesWhenStopped = true
+        indicator.tintColor = .darkGray
+        
+        return indicator
+    }()
 
     private let rootView: UIView = UIView()
     
     private let superScrollView: UIScrollView = {
         let superScrollView = UIScrollView()
         superScrollView.showsVerticalScrollIndicator = false
+        
         return superScrollView
     }()
     
@@ -115,8 +124,12 @@ class SearchViewController: UIViewController, PhotoSearch {
     
     let explorerCollectionView: UICollectionView = {
         let flowLayout = UICollectionViewFlowLayout()
+        flowLayout.scrollDirection = .horizontal
+        
         let explorerCollectionView = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
         explorerCollectionView.register(ExplorerCollectionViewCell.self, forCellWithReuseIdentifier: ExplorerCollectionViewCell.reuseIdentifier)
+        
+        explorerCollectionView.showsHorizontalScrollIndicator = false
         explorerCollectionView.backgroundColor = .white
         
         return explorerCollectionView
@@ -151,7 +164,6 @@ class SearchViewController: UIViewController, PhotoSearch {
         container.isHidden = true
         return container
     }()
-    
     
     let searchResultCollectionView: UICollectionView = {
         let flowLayout = FlexibleHeightCollectionViewLayout()
@@ -220,6 +232,7 @@ class SearchViewController: UIViewController, PhotoSearch {
     
         scrollContentView.addSubview(bottomStackView)
         bottomStackView.addArrangedSubview(bottomExplorerImageContainer)
+        bottomStackView.addSubview(indicator)
         
         bottomExplorerImageContainer.addSubview(explorerContainer)
         explorerContainer.addSubview(explorerLabel)
@@ -349,6 +362,14 @@ class SearchViewController: UIViewController, PhotoSearch {
         NSLayoutConstraint.activate([
             bottomExplorerImageContainer.widthAnchor.constraint(equalTo: bottomStackView.widthAnchor),
             bottomExplorerImageContainer.heightAnchor.constraint(greaterThanOrEqualToConstant: 0)
+        ])
+        
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            indicator.centerYAnchor.constraint(equalTo: bottomStackView.centerYAnchor),
+            indicator.centerXAnchor.constraint(equalTo: bottomStackView.centerXAnchor),
+            indicator.widthAnchor.constraint(equalToConstant: 30),
+            indicator.heightAnchor.constraint(equalToConstant: 30)
         ])
         
         explorerContainer.translatesAutoresizingMaskIntoConstraints = false
@@ -505,7 +526,6 @@ extension SearchViewController: SearchViewOutput {
             self.explorerCollectionView.reloadData()
         }
     }
-    
         
     func needReloadNewImageCollectionView() {
         DispatchQueue.main.async {
@@ -538,6 +558,14 @@ extension SearchViewController: SearchViewOutput {
                 self?.topImageView.image = image
                 self?.artistNameLabel.text = "Photo by \(photo.user.username)"
             }
+        }
+    }
+    
+    func isLoading(_ isLoading: Bool) {
+        DispatchQueue.main.async {
+            isLoading ?
+                self.indicator.startAnimating()
+                : self.indicator.stopAnimating()
         }
     }
 }
@@ -655,6 +683,5 @@ extension SearchViewController: ViewControllerDismissDelegate {
         }
 
         self.presentedViewController?.dismiss(animated: true, completion: nil)
-        
     }
 }
