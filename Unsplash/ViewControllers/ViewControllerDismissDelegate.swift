@@ -2,7 +2,7 @@
 //  CustomNavigationDelegate.swift
 //  Unsplash
 //
-//  Created by ZES2017MBP on 2020/11/21.
+//  Created by Minsoo Kim on 2020/11/21.
 //
 
 import UIKit

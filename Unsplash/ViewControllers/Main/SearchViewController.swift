@@ -7,7 +7,13 @@
 
 import UIKit
 
-class SearchViewController: UIViewController {
+protocol PhotoSearch: class {
+    associatedtype ViewMode
+    func setViewMode(_ viewMode: ViewMode)
+    func stickeyHeaderBehavior(_ scrollView: UIScrollView, _ parentViewMaxContentYOffset: CGFloat)
+}
+
+class SearchViewController: UIViewController, PhotoSearch {
 
     private let rootView: UIView = UIView()
     
@@ -80,8 +86,6 @@ class SearchViewController: UIViewController {
         return artistNameLabel
     }()
     
-    //
-    
     private let bottomStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -90,8 +94,6 @@ class SearchViewController: UIViewController {
         
         return stackView
     }()
-    
-    //
     
     private let bottomExplorerImageContainer = UIView()
     
@@ -228,7 +230,6 @@ class SearchViewController: UIViewController {
         newImagesContainer.addSubview(newImagesCollectionView)
         
         scrollContentView.addSubview(searchContainer)
-//        bottomStackView.addArrangedSubview(searchContainer)
         searchContainer.addSubview(searchResultCollectionView)
         
         scrollContentView.bringSubviewToFront(topContainer)
@@ -530,7 +531,15 @@ extension SearchViewController: SearchViewOutput {
             self.searchResultCollectionView.insertItems(at: indexPaths)
         }
     }
-
+    
+    func setTopPhoto(_ photo: Photo) {
+        ImageDownloadManager.shared.downloadImage(photo.urls.regular) { [weak self] (image, _, _, _) in
+            DispatchQueue.main.async {
+                self?.topImageView.image = image
+                self?.artistNameLabel.text = "Photo by \(photo.user.username)"
+            }
+        }
+    }
 }
 
 extension SearchViewController {
@@ -549,11 +558,7 @@ extension SearchViewController {
         }
     }
     
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        scrollGoingUp = scrollView.panGestureRecognizer.translation(in: scrollView).y < 0
-        
-        let parentViewMaxContentYOffset = superScrollView.contentSize.height - superScrollView.frame.height
-        
+    func stickeyHeaderBehavior(_ scrollView: UIScrollView, _ parentViewMaxContentYOffset: CGFloat) {
         if scrollGoingUp == true {
             if scrollView == newImagesCollectionView {
                 if superScrollView.contentOffset.y < parentViewMaxContentYOffset && !childScrollingDownDueToParent {
@@ -585,14 +590,14 @@ extension SearchViewController {
         
         if scrollView != searchResultCollectionView {
             let contentOffsetY = superScrollView.contentOffset.y
-
+            
             keytakeawayLabel.transform = CGAffineTransform(translationX: 0, y: contentOffsetY * 0.135)
-
+            
             keytakeawayLabel.alpha = 1 / max(contentOffsetY, 1) * 50
             topImageView.alpha = 1 / max(contentOffsetY, 1) * 50
-
+            
             searchBar.transform = CGAffineTransform(translationX: 0, y: contentOffsetY * 0.135)
-
+            
             topContainer.transform = CGAffineTransform(translationX: 0, y: contentOffsetY * (topContainer.frame.height - stickeyViewHeight + 35) / parentViewMaxContentYOffset)
             
             if contentOffsetY + 30 >= parentViewMaxContentYOffset {
@@ -608,6 +613,14 @@ extension SearchViewController {
                 topImageView.transform = transform.scaledBy(x: scale, y: scale)
             }
         }
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        scrollGoingUp = scrollView.panGestureRecognizer.translation(in: scrollView).y < 0
+        
+        let parentViewMaxContentYOffset = superScrollView.contentSize.height - superScrollView.frame.height
+        
+        stickeyHeaderBehavior(scrollView, parentViewMaxContentYOffset)
     }
 }
 
@@ -626,15 +639,6 @@ extension SearchViewController: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchViewModel.searchBegin()
-    }
-    
-    func setTopPhoto(_ photo: Photo) {
-        ImageDownloadManager.shared.downloadImage(photo.urls.regular) { [weak self] (image, _, _, _) in
-            DispatchQueue.main.async {
-                self?.topImageView.image = image
-                self?.artistNameLabel.text = "Photo by \(photo.user.username)"
-            }
-        }
     }
 }
 

@@ -7,8 +7,16 @@
 
 import UIKit
 
-final class DetailViewController: UIViewController {
-    let closeButton: UIButton = {
+protocol Pagination: class {
+    func horizontalPagenation(_ targetContentOffset: UnsafeMutablePointer<CGPoint>, _ scrollView: UIScrollView, _ velocity: CGPoint)
+}
+
+protocol PhotoDetail: class {
+    func setIntialIndexPath()
+}
+
+final class DetailViewController: UIViewController, PhotoDetail {
+    private let closeButton: UIButton = {
         let closeButton = UIButton(type: .system)
         closeButton.tintColor = .white
         if #available(iOS 13.0, *) {
@@ -20,7 +28,7 @@ final class DetailViewController: UIViewController {
         return closeButton
     }()
 
-    let artistNameLabel: UILabel = {
+    private let artistNameLabel: UILabel = {
         let artistNameLabel = UILabel()
         artistNameLabel.font = .systemFont(ofSize: 14)
         artistNameLabel.textColor = .white
@@ -28,7 +36,7 @@ final class DetailViewController: UIViewController {
         return artistNameLabel
     }()
 
-    let shareButton: UIButton = {
+    private let shareButton: UIButton = {
         let shareButton = UIButton(type: .system)
         shareButton.tintColor = .white
         if #available(iOS 13.0, *) {
@@ -39,7 +47,7 @@ final class DetailViewController: UIViewController {
         return shareButton
     }()
 
-    let infoButton: UIButton = {
+    private let infoButton: UIButton = {
         let infoButton = UIButton(type: .system)
         
         if #available(iOS 13.0, *) {
@@ -54,7 +62,7 @@ final class DetailViewController: UIViewController {
         return infoButton
     }()
 
-    let verticalButtonStackView: UIStackView = {
+    private let verticalButtonStackView: UIStackView = {
         let verticalButtonStackView = UIStackView()
         verticalButtonStackView.distribution = .fill
         verticalButtonStackView.axis = .vertical
@@ -64,7 +72,7 @@ final class DetailViewController: UIViewController {
         return verticalButtonStackView
     }()
 
-    let likeButton: UIButton = {
+    private let likeButton: UIButton = {
         let likeButton = UIButton(type: .system)
         
         if #available(iOS 13.0, *) {
@@ -77,7 +85,7 @@ final class DetailViewController: UIViewController {
         return likeButton
     }()
 
-    let plusButton: UIButton = {
+    private let plusButton: UIButton = {
         let plusButton = UIButton(type: .system)
         
         if #available(iOS 13.0, *) {
@@ -90,7 +98,7 @@ final class DetailViewController: UIViewController {
         return plusButton
     }()
 
-    let downloadButton: UIButton = {
+    private let downloadButton: UIButton = {
         let downloadButton = UIButton(type: .system)
         downloadButton.backgroundColor = .white
         if #available(iOS 13.0, *) {
@@ -103,7 +111,7 @@ final class DetailViewController: UIViewController {
         return downloadButton
     }()
 
-    let imageCollectionView: UICollectionView = {
+    private let imageCollectionView: UICollectionView = {
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.scrollDirection = .horizontal
         
@@ -116,7 +124,7 @@ final class DetailViewController: UIViewController {
     
     var detailViewModel: DetailViewModel!
     weak var dismissDelegate: ViewControllerDismissDelegate?
-    var initialIndexLayouted: Bool = false
+    private var initialIndexLayouted: Bool = false
 
     init(detailViewModel: DetailViewModel) {
         super.init(nibName: nil, bundle: nil)
@@ -134,12 +142,12 @@ final class DetailViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         defer {
+            setDelegates()
             detailViewModel.detailViewOutput = self
         }
         
         addViews()
         setConstraints()
-        setDelegates()
         setCloseButtonAction()
     }
 
@@ -151,12 +159,7 @@ final class DetailViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        if !initialIndexLayouted {
-            initialIndexLayouted = true
-            imageCollectionView.setNeedsLayout()
-            imageCollectionView.layoutIfNeeded()
-            imageCollectionView.scrollToItem(at: detailViewModel.currentState.currentIndex, at: .centeredHorizontally, animated: false)
-        }
+        setIntialIndexPath()
     }
 
     private func addViews() {
@@ -222,12 +225,21 @@ final class DetailViewController: UIViewController {
         ])
     }
     
-    func setCloseButtonAction() {
+    func setIntialIndexPath() {
+        if !initialIndexLayouted {
+            initialIndexLayouted = true
+            imageCollectionView.setNeedsLayout()
+            imageCollectionView.layoutIfNeeded()
+            imageCollectionView.scrollToItem(at: detailViewModel.currentState.currentIndex, at: .centeredHorizontally, animated: false)
+        }
+    }
+    
+    private func setCloseButtonAction() {
         closeButton.addTarget(self, action: #selector(closeButtonTapped), for: .touchUpInside)
     }
     
     @objc
-    func closeButtonTapped() {
+    private func closeButtonTapped() {
         dismissDelegate?.dismissCalledFromChild(lastIndexPath: detailViewModel.currentState.currentIndex)
     }
 }
@@ -242,7 +254,7 @@ extension DetailViewController: UICollectionViewDelegateFlowLayout {
         collectionView.bounds.size
     }
     
-    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+    func horizontalPagenation(_ targetContentOffset: UnsafeMutablePointer<CGPoint>, _ scrollView: UIScrollView, _ velocity: CGPoint) {
         let imageCount = detailViewModel.currentState.photos.count
         
         targetContentOffset.pointee = scrollView.contentOffset
@@ -263,8 +275,14 @@ extension DetailViewController: UICollectionViewDelegateFlowLayout {
             index = min(imageCount - 1, index)
         }
         let targetIndexPath = IndexPath(row: index, section: 0)
+        
         imageCollectionView.scrollToItem(at: targetIndexPath, at: .centeredHorizontally, animated: true)
+        
         detailViewModel.currentIndexChanged(indexPath: targetIndexPath)
+    }
+    
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        horizontalPagenation(targetContentOffset, scrollView, velocity)
     }
 }
 

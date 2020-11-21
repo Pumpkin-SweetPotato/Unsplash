@@ -16,7 +16,7 @@ final class ImageDownloadManager {
     private var completionHandler: ImageDownloadHandler?
     lazy var imageDownloadQueue: OperationQueue = {
         var queue = OperationQueue()
-        queue.name = "net.eazel.Eazel.imageDownloadQueue"
+        queue.name = "my.imageDownloadQueue"
         queue.qualityOfService = .userInteractive
         return queue
     }()

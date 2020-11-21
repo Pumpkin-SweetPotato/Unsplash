@@ -1,6 +1,6 @@
 //
 //  APIClient.swift
-//  PokemonLibrary
+//  
 //
 //  Created by Minsoo Kim on 2020/11/13.
 //
@@ -8,10 +8,6 @@
 import Foundation
 
 class APIClient {
-//    let shared: APIClient = APIClient()
-//
-//    init() {}
-    
     let session: URLSession = URLSession.shared
     typealias APISearchResult = (Data?, URLResponse?, Error?)
     typealias APICompletionHandler = ((Data?, URLResponse?, Error?) -> Void)
@@ -88,8 +84,4 @@ class APIClient {
         
         return request
     }
-}
-
-extension DateFormatter {
-    
 }

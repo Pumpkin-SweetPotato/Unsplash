@@ -2,7 +2,7 @@
 //  ViewConstants.swift
 //  Unsplash
 //
-//  Created by ZES2017MBP on 2020/11/20.
+//  Created by Minsoo Kim on 2020/11/20.
 //
 
 import UIKit
