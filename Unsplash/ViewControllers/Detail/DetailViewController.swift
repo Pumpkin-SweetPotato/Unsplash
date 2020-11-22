@@ -150,17 +150,23 @@ final class DetailViewController: UIViewController, PhotoDetail {
         setConstraints()
         setCloseButtonAction()
     }
-
-    private func setDelegates() {
-        imageCollectionView.delegate = self
-        imageCollectionView.dataSource = self
-    }
     
+    deinit {
+        print("\(String(describing: self)) deinit called")
+    }
+
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
         setIntialIndexPath()
     }
+    
+    private func setDelegates() {
+        imageCollectionView.delegate = self
+        imageCollectionView.dataSource = self
+    }
+    
+    
 
     private func addViews() {
         view.addSubview(imageCollectionView)
