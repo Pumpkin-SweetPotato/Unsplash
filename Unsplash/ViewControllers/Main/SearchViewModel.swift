@@ -123,7 +123,6 @@ class SearchViewModel: SearchViewInput {
     
     func searchTextChanged(_ text: String) {
         currentState.searchText = text
-        currentState.searchPage = 1
     }
     
     func searchBegin() {
@@ -132,6 +131,8 @@ class SearchViewModel: SearchViewInput {
             return
         }
         
+        currentState.searchPage = 1
+        
         if currentState.searchingRequest != nil {
             currentState.searchingRequest?.cancel()
             currentState.searchingRequest = nil
@@ -139,7 +140,7 @@ class SearchViewModel: SearchViewInput {
         
         let keyword = currentState.searchText
         
-        let request = apiClient.reqeust(SearchPhotoResponse.self, apiRouter: .searchPhoto(keyword: keyword, page: currentState.searchPage)) { [weak self] result in
+        let request = apiClient.reqeust(SearchPhotoResponse.self, apiRouter: .searchPhoto(keyword: keyword, page: 1)) { [weak self] result in
             guard let self = self else { return }
             self.currentState.isRequestingNewPhotos = false
             switch result {
