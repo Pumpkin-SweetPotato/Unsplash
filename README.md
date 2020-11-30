@@ -1,3 +1,3 @@
 # Unsplash
 
-This is clone App for Unsplash
+This is a clone App for Unsplash
